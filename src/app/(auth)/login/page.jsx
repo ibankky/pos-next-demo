@@ -1,9 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store'; 
+
+import { AlertCircleIcon, CheckCircle2Icon, PopcornIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import Spinner from '@/components/ui/spin';
 
 export default function LoginPage() {
   const [error, setError] = useState('');
+  const router = useRouter();
+
+  // ✅ ใช้ action จาก store
+  const setUser = useAuthStore((s) => s.setUser);
+  const setToken = useAuthStore((s) => s.setToken);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -11,7 +22,7 @@ export default function LoginPage() {
     const username = e.target.username.value;
     const password = e.target.password.value;
 
-    const res = await fetch('/api/login', {
+    const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
@@ -19,10 +30,14 @@ export default function LoginPage() {
 
     const data = await res.json();
     if (data.success) {
-      alert('Login success!');
-      // คุณสามารถเก็บ token ใน cookie, localStorage หรือ redirect ได้เลย
+      // ✅ เก็บ token / user ลงใน Zustand
+      setToken(data.token);
+      setUser(data.user);
+
+      // ✅ เปลี่ยน route ไปหน้าอื่น
+      router.push('/topup');
     } else {
-      setError(data.message);
+      setError(data.message || 'Login failed');
     }
   }
 
@@ -42,6 +57,9 @@ export default function LoginPage() {
           <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
             Sign In
           </button>
+         {/*  <Button variant="default" size="sm">
+            <Spinner  /> New
+          </Button> */}
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         </form>
       </div>
