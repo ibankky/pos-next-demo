@@ -1,7 +1,7 @@
-import { Roboto } from "next/font/google";
+import { Prompt } from "next/font/google";
 import "./globals.css";
 
-const roboto = Roboto({
+const prompt = Prompt({
   weight: '400',
   subsets: ['latin'],
 })
@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/icon-192.png" />
       </head>
       <body
-        className={`${roboto.className} antialiased`}
+        className={`${prompt.className} antialiased`}
       >
         {children}
       </body>

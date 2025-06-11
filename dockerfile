@@ -1,20 +1,12 @@
-# Dockerfile
-FROM node:18-alpine
+FROM node:18-bullseye
 
-# Set working directory
 WORKDIR /app
+RUN apt-get update && apt-get install -y python3 build-essential
 
-# Copy package files
-COPY package*.json ./
+COPY package.json yarn.lock ./
+RUN yarn install
 
-# Install dependencies
-RUN npm install
-
-# Copy source code
 COPY . .
 
-# Expose port
 EXPOSE 3000
-
-# Start Next.js
-CMD ["npm", "run", "dev"]
+CMD ["yarn", "dev"]

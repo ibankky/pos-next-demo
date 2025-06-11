@@ -1,4 +1,3 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 
@@ -7,7 +6,7 @@ export default function PosLayout({ children }) {
     <div className='flex min-h-screen'>
       {/* Sidebar */}
       <aside className='w-64 bg-gray-800 text-white p-4'>
-      <AppSidebar />
+        <Sidebar></Sidebar>
         {/* ใส่ลิงก์เมนู */}
       </aside>
 
