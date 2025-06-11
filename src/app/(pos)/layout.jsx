@@ -1,5 +1,5 @@
-import Header from '@/components/Header';
-import Sidebar from '@/components/Sidebar';
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 
 export default function PosLayout({ children }) {
   return (
@@ -7,7 +7,6 @@ export default function PosLayout({ children }) {
       {/* Sidebar */}
       <aside className='w-64 bg-gray-800 text-white p-4'>
         <Sidebar></Sidebar>
-        {/* ใส่ลิงก์เมนู */}
       </aside>
 
       <main className='flex-1'>

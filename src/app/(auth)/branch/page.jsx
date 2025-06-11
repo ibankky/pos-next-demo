@@ -29,7 +29,7 @@ export default function LoginPage() {
     e.preventDefault();
     if (category) {
       console.log('go to next page');
-      router.push('/topup');
+      router.push('/main');
     } else {
       setError(data.message || 'Please Select Branch');
     }
