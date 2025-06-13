@@ -8,7 +8,8 @@ export default function Header() {
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout); 
-
+  console.log('check state user');
+  console.log(user);
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' }); // ลบ cookie
     logout(); // ล้าง Zustand state
@@ -21,7 +22,7 @@ export default function Header() {
 
       {user ? (
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-700">👤 {user.name}</span>
+          <span className="text-sm text-gray-700">👤 {user}</span>
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             Logout
           </Button>

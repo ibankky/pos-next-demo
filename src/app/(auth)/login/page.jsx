@@ -15,12 +15,20 @@ export default function LoginPage() {
   // ✅ ใช้ action จาก store
   const setUser = useAuthStore((s) => s.setUser);
   const setToken = useAuthStore((s) => s.setToken);
+  const setMacAddress = useAuthStore((s) => s.setMacAddress);
 
   async function handleSubmit(e) {
     e.preventDefault();
 
     const username = e.target.username.value;
     const password = e.target.password.value;
+
+    const macRes = await fetch('/api/get-mac');
+    const macData = await macRes.json();
+    const mac = macData.mac || 'unknown';
+    console.log('get mac address');
+    console.log(mac);
+    setMacAddress(mac);
 
     const res = await fetch('/api/auth/login', {
       method: 'POST',

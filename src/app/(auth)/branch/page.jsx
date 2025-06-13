@@ -40,6 +40,11 @@ export default function LoginPage() {
     setCategory(selectedOption?.value)
   }
 
+  const handleClickBack = () => {
+    console.log('click back')
+    router.push('/login');
+  }
+
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-900 px-4 w-2/5">
       <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8 space-y-6">
@@ -61,10 +66,20 @@ export default function LoginPage() {
               />
             </div>
           </div>
+          <div className='flex gap-x-6'>
+            
+            <div className='w-1/2'>
+               <button type="button" className="w-full border  border-gray-500 text-gray-700 rounded py-2"  onClick={() => handleClickBack()}>
+                 ย้อนกลับ
+               </button>
+            </div>
+            <div className='w-1/2'>
+                <button type="submit" className="w-full  bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                 เลือกสาขา
+              </button>
+            </div>
+          </div>
           
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-            Log In
-          </button>
 
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         </form>
