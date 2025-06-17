@@ -7,13 +7,13 @@ import Tables from "@/components/Tables";
 export default function TopUpPage() {
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  /* useEffect(() => {
     const delay = setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 500);
 
     return () => clearTimeout(delay);
-  }, []);
+  }, []); */
 
   const handleConfirm = (val) => {
     console.log("Confirmed amount:", val);
@@ -38,13 +38,13 @@ export default function TopUpPage() {
     },
   ]
 
-  if (loading) {
+  /* if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin h-12 w-12 rounded-full border-4 border-blue-400 border-t-transparent"></div>
       </div>
     );
-  }
+  } */
 
   return (
     <div className='p-6'>
