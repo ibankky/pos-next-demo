@@ -8,8 +8,6 @@ export default function Header() {
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout); 
-  console.log('check state user');
-  console.log(user);
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' }); // ลบ cookie
     logout(); // ล้าง Zustand state

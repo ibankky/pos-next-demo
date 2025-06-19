@@ -178,3 +178,7 @@
 .react-select__option--is-selected {
   @apply bg-blue-600 text-white;
 }
+
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}

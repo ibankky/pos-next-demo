@@ -1,0 +1,341 @@
+"use client";
+
+import { useForm, Controller , useWatch } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useEffect } from "react";
+import { ChevronsDownUp, Check } from "lucide-react";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+import SelectWithController from "@/components/SelectWithController";
+
+const formSchema = z.object({
+  code: z.string().min(1, "กรุณากรอก code"),
+  description: z.string().min(1, "กรุณากรอกรายละเอียด"),
+  group_menu_id: z.string().min(1, "กรุณาเลือก Menu Group"),
+  card_type_id: z.string().min(1, "กรุณาเลือก Card Type"),
+  price: z
+    .number({ invalid_type_error: "Price is required" })
+    .gt(1, { message: "Price must be greater than 1" }),
+  branch_group_id: z
+    .string()
+    .min(1, "กรุณาเลือก Branch Group")
+    .transform((val) => Number(val)), // ถ้าต้องการแปลงเป็น number ภายหลัง
+  branch_list: z.array(z.string()).nonempty("กรุณาเลือกสาขา"),
+  check1: z.boolean().optional(),
+  check2: z.boolean().optional(),
+  limit_time: z
+    .number({ invalid_type_error: "กรุณาใส่ตัวเลข" })
+    .min(0, "ต้องมากกว่าหรือเท่ากับ 0") // 👈 0 ผ่านได้
+    .optional(), // 👈 ไม่กรอกก็ไม่เป็นไร
+  e_Coin: z
+    .string()
+    .min(1, "กรุณากรอก eCoin")
+    .transform((val) => Number(val))
+    .refine((val) => val > 0, {
+      message: "eCoin ต้องมากกว่า 0",
+    }),
+  e_Bonus: z
+    .string()
+    .min(1, "กรุณากรอก eBonus")
+    .transform((val) => Number(val))
+    .refine((val) => val > 0, {
+      message: "eBonus ต้องมากกว่า 0",
+    }),
+});
+
+export default function PosMenu() {
+  const [submittedData, setSubmittedData] = useState(null);
+  const [openBranchGroups, setOpenBranchGroups] = useState(false);
+  const [openBranches, setOpenBranches] = useState(false);
+  const [openGroupsMenus, setOpenGroupMenus] = useState(false);
+  const [openCardTypes, setOpenCardTypes] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [option, setOption] = useState("");
+  const [branches, setBranches] = useState([]);
+  const [branchGroups, setBranchGroups] = useState([]);
+  const [cardTypes, setCardTypes] = useState([]);
+  const [groupMenus, setGroupMenus] = useState([]);
+  const [selectedGroupMenu, setSelectedGroupMenu] = useState("");
+  const [selectedCardType, setSelectedCardType] = useState("");
+  const [selectedBranchGroup, setSelectedBranchGroups] = useState("");
+  const [expireType, setExpireType] = useState("days");
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const res = await fetch("/api/branch");
+        if (!res.ok) throw new Error("Failed to fetch branches");
+        const json = await res.json();
+        setBranches(json.data || []); // สมมุติ data เป็น array
+      } catch (err) {
+        console.error("Error loading branches:", err);
+      }
+    };
+    const fetchBranchGroups = async () => {
+      try {
+        const res = await fetch("/api/branch-group");
+        if (!res.ok) throw new Error("Failed to fetch branches");
+        const json = await res.json();
+        setBranchGroups(json.data || []);
+      } catch (err) {
+        console.error("Error loading GroupBranches:", err);
+      }
+    };
+
+    const fetchCardType = async () => {
+      try {
+        const res = await fetch("/api/card-type");
+        if (!res.ok) throw new Error("Failed to fetch branches");
+        const json = await res.json();
+        setCardTypes(json.data || []);
+      } catch (err) {
+        console.error("Error loading GroupBranches:", err);
+      }
+    };
+
+    const fetchGroupMenu = async () => {
+      try {
+        const res = await fetch("/api/group-menu");
+        if (!res.ok) throw new Error("Failed to fetch branches");
+        const json = await res.json();
+        setGroupMenus(json.data || []);
+      } catch (err) {
+        console.error("Error loading GroupBranches:", err);
+      }
+    };
+
+    fetchBranches();
+    fetchBranchGroups();
+    fetchCardType();
+    fetchGroupMenu();
+  }, []);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      code: "",
+      description: "",
+      group_menu_id: "",
+      card_type_id: "",
+      price: 0,
+      branch_group_id: "",
+      branch_list: [],
+      limit_time: 0,
+      e_Coin: 0,
+      e_Bonus: 0,
+    },
+  });
+
+  const radioOption = useWatch({
+    control,
+    name: "radioOption",
+    defaultValue: "days",
+  });
+
+  const onSubmit = (data) => {
+    console.log("Form Data:", data);
+    setSubmittedData(data);
+  };
+
+  return (
+    <div className='max-w-xl mt-10 bg-white p-6 rounded-xl shadow space-y-6'>
+      <h1 className='text-xl font-semibold text-center'>Pos menu</h1>
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+        <div>
+          <Label htmlFor='code'>Menu Code</Label>
+          <Input id='code' {...register("code")} placeholder='code' />
+          {errors.code && (
+            <p className='text-sm text-red-500'>{errors.code.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor='description'>Menu Description</Label>
+          <Input
+            id='description'
+            {...register("description")}
+            placeholder='description'
+          />
+          {errors.description && (
+            <p className='text-sm text-red-500'>{errors.description.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label>Menu Group</Label>
+          <SelectWithController
+            name='group_menu_id'
+            control={control}
+            options={groupMenus}
+            getOptionLabel={(g) => g.name}
+            getOptionValue={(g) => g.id}
+          />
+          {errors.group_menu_id && (
+            <p className='text-sm text-red-500'>
+              {errors.group_menu_id.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <Label>Card Type</Label>
+          <SelectWithController
+            name='card_type_id'
+            control={control}
+            options={cardTypes}
+            getOptionLabel={(g) => g.name}
+            getOptionValue={(g) => g.id}
+          />
+          {errors.card_type_id && (
+            <p className='text-sm text-red-500'>
+              {errors.card_type_id.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor='price'>Price</Label>
+          <Input
+            id='price'
+            type='number'
+            step='any'
+            {...register("price", { valueAsNumber: true })}
+          />
+          {errors.price && (
+            <p className='text-sm text-red-500'>{errors.price.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor='eCoin'>eCoin</Label>
+          <Input
+            id='eCoin'
+            type='number'
+            step='any'
+            {...register("e_Coin")}
+            placeholder='eCoin'
+          />
+          {errors.e_Coin && (
+            <p className='text-sm text-red-500'>{errors.e_Coin.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor='eBonus'>eBonus</Label>
+          <Input
+            id='eBonus'
+            type='number'
+            step='any'
+            {...register("e_Bonus")}
+            placeholder='eBonus'
+          />
+          {errors.e_Bonus && (
+            <p className='text-sm text-red-500'>{errors.e_Bonus.message}</p>
+          )}
+        </div>
+
+        <div className="flex gap-4">
+          <div className="w-1/2">
+          <Label htmlFor='eBonusExpire'>eBonus Expire</Label>
+          <RadioGroup defaultValue='days' onValueChange={(val) => setValue("radioOption", val)}>
+            <div className='flex items-center space-x-2'>
+              <RadioGroupItem value='days' id='days' />
+              <Label htmlFor='days' className="mt-2.5">จำนวนวัน</Label>
+            </div>
+            <div className='flex items-center space-x-2'>
+              <RadioGroupItem value='fixed-day' id='fixed-day' />
+              <Label htmlFor='fixed-day' className="mt-2.5">ระบุวัน</Label>
+            </div>
+          </RadioGroup>
+          </div>  
+          <div className="w-1/2">
+          {radioOption === "days" && (
+        <div>
+          <Label htmlFor="dayCount">จำนวนวัน</Label>
+          <Input type="number" {...register("dayCount")} />
+        </div>
+      )}
+
+      {radioOption === "fixed-day" && (
+        <div>
+          <Label htmlFor="expireDate">วันหมดอายุ</Label>
+          <Input  type="date" {...register("expireDate")} />
+        </div>
+      )}
+          </div>
+
+         
+        </div>
+
+        <div>
+          <Label htmlFor='playTime'>Play Times</Label>
+          <Input
+            id='playTime'
+            type='number'
+            step='any'
+            {...register("limit_time", { valueAsNumber: true })}
+            placeholder='จำนวนครั้ง'
+          />
+          {errors.limit_time && (
+            <p className='text-sm text-red-500'>{errors.limit_time.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label>BranchGroup</Label>
+          <SelectWithController
+            name='branch_group_id'
+            control={control}
+            options={branchGroups}
+            getOptionLabel={(b) => b.group_name}
+            getOptionValue={(b) => b.id.toString()}
+          />
+          {errors.branch_group_id && (
+            <p className='text-sm text-red-500'>
+              {errors.branch_group_id.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor='eBonusExpire'>สาขาที่เล่นได้</Label>
+          <SelectWithController
+            name='branch_list'
+            control={control}
+            options={branches}
+            getOptionLabel={(b) => b.branch_name}
+            getOptionValue={(b) => b.branch_code}
+            isMulti
+          />
+          {errors.branch_list && (
+            <p className='text-sm text-red-500'>{errors.branch_list.message}</p>
+          )}
+        </div>
+
+        <hr className='my-4 border-t border-gray-200' />
+        <Button type='submit' className='w-full'>
+          บันทึกการตั้งค่า
+        </Button>
+      </form>
+
+      {submittedData && (
+        <pre className='text-xs bg-gray-100 p-2 rounded mt-4'>
+          {JSON.stringify(submittedData, null, 2)}
+        </pre>
+      )}
+    </div>
+  );
+}
