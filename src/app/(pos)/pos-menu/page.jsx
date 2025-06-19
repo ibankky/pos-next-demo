@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, Controller , useWatch } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import SelectWithController from "@/components/SelectWithController";
+import DateTimeInput from "@/components/DateTimeInput";
 
 const formSchema = z.object({
   code: z.string().min(1, "กรุณากรอก code"),
@@ -27,26 +28,43 @@ const formSchema = z.object({
     .min(1, "กรุณาเลือก Branch Group")
     .transform((val) => Number(val)), // ถ้าต้องการแปลงเป็น number ภายหลัง
   branch_list: z.array(z.string()).nonempty("กรุณาเลือกสาขา"),
-  check1: z.boolean().optional(),
-  check2: z.boolean().optional(),
   limit_time: z
     .number({ invalid_type_error: "กรุณาใส่ตัวเลข" })
     .min(0, "ต้องมากกว่าหรือเท่ากับ 0") // 👈 0 ผ่านได้
     .optional(), // 👈 ไม่กรอกก็ไม่เป็นไร
-  e_Coin: z
+  e_coin: z
     .string()
     .min(1, "กรุณากรอก eCoin")
     .transform((val) => Number(val))
     .refine((val) => val > 0, {
       message: "eCoin ต้องมากกว่า 0",
     }),
-  e_Bonus: z
+  e_bonus: z
     .string()
     .min(1, "กรุณากรอก eBonus")
     .transform((val) => Number(val))
     .refine((val) => val > 0, {
       message: "eBonus ต้องมากกว่า 0",
     }),
+  start_date: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((val) => (val ? new Date(val) : undefined)),
+
+  end_date: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((val) => (val ? new Date(val) : undefined)),
+
+  card_expire_date: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((val) => (val ? new Date(val) : undefined)),
+
+    is_active: z.boolean().default(true),  
 });
 
 export default function PosMenu() {
@@ -65,6 +83,10 @@ export default function PosMenu() {
   const [selectedCardType, setSelectedCardType] = useState("");
   const [selectedBranchGroup, setSelectedBranchGroups] = useState("");
   const [expireType, setExpireType] = useState("days");
+  const [expireDate, setExpireDate] = useState(null);
+  const [dayCount, setDayCount] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -134,9 +156,14 @@ export default function PosMenu() {
       branch_group_id: "",
       branch_list: [],
       limit_time: 0,
-      e_Coin: 0,
-      e_Bonus: 0,
+      e_coin: 0,
+      e_bonus: 0,
+      start_date: null,
+      end_date: null,
+      card_expire_date: null,
+      is_active : true,
     },
+    shouldUnregister: false,
   });
 
   const radioOption = useWatch({
@@ -146,14 +173,36 @@ export default function PosMenu() {
   });
 
   const onSubmit = (data) => {
-    console.log("Form Data:", data);
-    setSubmittedData(data);
+    let expireDateString = "";
+    let startDateString = startDate ? startDate.toISOString() : null;
+    let endDateString = endDate ? endDate.toISOString() : null;
+    if (radioOption === "fixed-day") {
+      expireDateString = expireDate.toISOString();
+    } else {
+      const now = new Date();
+      now.setDate(now.getDate() + Number(dayCount));
+      expireDateString = now.toISOString();
+    }
+    const formData = {
+      ...data,
+      card_expire_date: expireDateString,
+      start_date: startDateString,
+      end_date: endDateString,
+      bonus_expire_date: null,
+      machine_group_id: null,
+    };
+    setSubmittedData(formData);
   };
 
   return (
     <div className='max-w-xl mt-10 bg-white p-6 rounded-xl shadow space-y-6'>
       <h1 className='text-xl font-semibold text-center'>Pos menu</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+      <form
+        onSubmit={handleSubmit(onSubmit, (err) => {
+          console.log("❌ Validation Error:", err);
+        })}
+        className='space-y-4'
+      >
         <div>
           <Label htmlFor='code'>Menu Code</Label>
           <Input id='code' {...register("code")} placeholder='code' />
@@ -225,11 +274,11 @@ export default function PosMenu() {
             id='eCoin'
             type='number'
             step='any'
-            {...register("e_Coin")}
+            {...register("e_coin")}
             placeholder='eCoin'
           />
-          {errors.e_Coin && (
-            <p className='text-sm text-red-500'>{errors.e_Coin.message}</p>
+          {errors.e_coin && (
+            <p className='text-sm text-red-500'>{errors.e_coin.message}</p>
           )}
         </div>
 
@@ -239,45 +288,58 @@ export default function PosMenu() {
             id='eBonus'
             type='number'
             step='any'
-            {...register("e_Bonus")}
+            {...register("e_bonus")}
             placeholder='eBonus'
           />
-          {errors.e_Bonus && (
-            <p className='text-sm text-red-500'>{errors.e_Bonus.message}</p>
+          {errors.e_bonus && (
+            <p className='text-sm text-red-500'>{errors.e_bonus.message}</p>
           )}
         </div>
 
-        <div className="flex gap-4">
-          <div className="w-1/2">
-          <Label htmlFor='eBonusExpire'>eBonus Expire</Label>
-          <RadioGroup defaultValue='days' onValueChange={(val) => setValue("radioOption", val)}>
-            <div className='flex items-center space-x-2'>
-              <RadioGroupItem value='days' id='days' />
-              <Label htmlFor='days' className="mt-2.5">จำนวนวัน</Label>
-            </div>
-            <div className='flex items-center space-x-2'>
-              <RadioGroupItem value='fixed-day' id='fixed-day' />
-              <Label htmlFor='fixed-day' className="mt-2.5">ระบุวัน</Label>
-            </div>
-          </RadioGroup>
-          </div>  
-          <div className="w-1/2">
-          {radioOption === "days" && (
-        <div>
-          <Label htmlFor="dayCount">จำนวนวัน</Label>
-          <Input type="number" {...register("dayCount")} />
-        </div>
-      )}
-
-      {radioOption === "fixed-day" && (
-        <div>
-          <Label htmlFor="expireDate">วันหมดอายุ</Label>
-          <Input  type="date" {...register("expireDate")} />
-        </div>
-      )}
+        <div className='flex gap-4'>
+          <div className='w-1/2'>
+            <Label htmlFor='eBonusExpire'>eBonus Expire</Label>
+            <RadioGroup
+              defaultValue='days'
+              onValueChange={(val) => setValue("radioOption", val)}
+            >
+              <div className='flex items-center space-x-2'>
+                <RadioGroupItem value='days' id='days' />
+                <Label htmlFor='days' className='mt-2.5'>
+                  จำนวนวัน
+                </Label>
+              </div>
+              <div className='flex items-center space-x-2'>
+                <RadioGroupItem value='fixed-day' id='fixed-day' />
+                <Label htmlFor='fixed-day' className='mt-2.5'>
+                  ระบุวัน
+                </Label>
+              </div>
+            </RadioGroup>
           </div>
+          <div className='w-1/2'>
+            {radioOption === "days" && (
+              <div>
+                <Label htmlFor='dayCount'>จำนวนวัน</Label>
+                <Input
+                  id='dayCount'
+                  type='number'
+                  value={dayCount}
+                  onChange={(e) => setDayCount(e.target.value)}
+                />
+              </div>
+            )}
 
-         
+            {radioOption === "fixed-day" && (
+              <div>
+                <DateTimeInput
+                  value={expireDate}
+                  onChange={setExpireDate}
+                  label='เลือกวันเวลาหมดอายุ'
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         <div>
@@ -323,6 +385,36 @@ export default function PosMenu() {
           {errors.branch_list && (
             <p className='text-sm text-red-500'>{errors.branch_list.message}</p>
           )}
+        </div>
+        <div>
+          <DateTimeInput
+            value={startDate}
+            onChange={setStartDate}
+            label='Start Date'
+          />
+        </div>
+        <div>
+          <DateTimeInput
+            value={endDate}
+            onChange={setEndDate}
+            label='End Date'
+          />
+        </div>
+        <div>
+        <Controller
+            name="is_active"
+            control={control}
+            defaultValue={true}
+            render={({ field }) => (
+                <div>
+                <Label>Active</Label>
+                <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                />
+                </div>
+            )}
+            />
         </div>
 
         <hr className='my-4 border-t border-gray-200' />
