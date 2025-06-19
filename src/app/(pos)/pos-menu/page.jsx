@@ -12,8 +12,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Toaster } from 'sonner';
 import SelectWithController from "@/components/SelectWithController";
 import DateTimeInput from "@/components/DateTimeInput";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   code: z.string().min(1, "กรุณากรอก code"),
@@ -172,16 +174,26 @@ export default function PosMenu() {
     defaultValue: "days",
   });
 
-  const onSubmit = (data) => {
-    let expireDateString = "";
+  const  onSubmit = async (data) => {
+    let expireDateString = null
     let startDateString = startDate ? startDate.toISOString() : null;
     let endDateString = endDate ? endDate.toISOString() : null;
     if (radioOption === "fixed-day") {
-      expireDateString = expireDate.toISOString();
-    } else {
-      const now = new Date();
-      now.setDate(now.getDate() + Number(dayCount));
-      expireDateString = now.toISOString();
+        if(expireDate){
+            expireDateString = expireDate.toISOString();
+        }else{
+            expireDateString = null
+        }
+     
+    }else if (radioOption === "day"){
+        if(dayCount){
+            const now = new Date();
+            now.setDate(now.getDate() + Number(dayCount));
+            expireDateString = now.toISOString();
+        }else{
+            expireDateString = null
+        }
+      
     }
     const formData = {
       ...data,
@@ -192,6 +204,30 @@ export default function PosMenu() {
       machine_group_id: null,
     };
     setSubmittedData(formData);
+    try {
+        const res = await fetch("/api/pos-menu", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData), // ใส่ข้อมูลที่ต้องการส่ง
+        });
+      
+        if (!res.ok) throw new Error("Failed to save pos menu");
+      
+        const result = await res.json();
+      
+        toast("บันทึกสำเร็จ", {
+            className: "bg-green-100 text-green-900 border border-green-400",
+            description: "ระบบได้บันทึกเรียบร้อยแล้ว",
+            iconTheme: {
+              primary: "#22c55e", // สีเขียว
+              secondary: "#bbf7d0",
+            },
+          });
+      } catch (err) {
+        toast.error("เกิดข้อผิดพลาด");
+      }
   };
 
   return (

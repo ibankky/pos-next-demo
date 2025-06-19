@@ -1,5 +1,6 @@
 import { Prompt } from "next/font/google";
 import "./globals.css";
+import { Toaster } from 'sonner';
 
 const prompt = Prompt({
   weight: '400',
@@ -24,6 +25,7 @@ export default function RootLayout({ children }) {
         className={`${prompt.className} antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

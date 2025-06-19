@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 
+
 export default function PosLayout({ children }) {
   return (
     <div className='flex min-h-screen'>
