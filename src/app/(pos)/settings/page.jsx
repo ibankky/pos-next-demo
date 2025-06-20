@@ -130,7 +130,155 @@ export default function SettingsPage() {
     <div className='max-w-xl mt-10 bg-white p-6 rounded-xl shadow space-y-6'>
       <h1 className='text-xl font-semibold text-center'>ตั้งค่าระบบ</h1>
       <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-        
+        <div>
+          <Label htmlFor='name'>ชื่อ</Label>
+          <Input id='name' {...register("name")} />
+          {errors.name && (
+            <p className='text-sm text-red-500'>{errors.name.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor='email'>อีเมล</Label>
+          <Input id='email' {...register("email")} />
+          {errors.email && (
+            <p className='text-sm text-red-500'>{errors.email.message}</p>
+          )}
+        </div>
+        <hr className="my-4 border-t border-gray-200" />
+        <div>
+          <Label>ธีม</Label>
+          <Select
+            onValueChange={(val) => setValue("theme", val)}
+            defaultValue='light'
+          >
+            <SelectTrigger>
+              <SelectValue placeholder='เลือกธีม' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='light'>สว่าง</SelectItem>
+              <SelectItem value='dark'>มืด</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.theme && (
+            <p className='text-sm text-red-500'>{errors.theme.message}</p>
+          )}
+        </div>
+        <hr className="my-4 border-t border-gray-200" />
+        <div>
+        <Label>Radio </Label>
+          <RadioGroup defaultValue='option-one' onValueChange={(val) => setValue("radioOption", val)}>
+            <div className='flex items-center space-x-2'>
+              <RadioGroupItem value='option-one' id='option-one' />
+              <Label htmlFor='option-one' className="mt-2.5">Option One</Label>
+            </div>
+            <div className='flex items-center space-x-2'>
+              <RadioGroupItem value='option-two' id='option-two' />
+              <Label htmlFor='option-two' className="mt-2.5">Option Two</Label>
+            </div>
+          </RadioGroup>
+        </div>
+        <hr className="my-4 border-t border-gray-200" />
+        <div>
+        <Label>Switch On/Off</Label>
+        <Switch checked={watch("isActive")} onCheckedChange={(val) => setValue("isActive", val)} />
+        </div>
+        <hr className="my-4 border-t border-gray-200" />
+        <div>
+        <Label>Select With Search</Label>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant='outline'
+                role='combobox'
+                aria-expanded={open}
+                className='w-[200px] justify-between'
+              >
+                {option
+                  ? frameworks.find((framework) => framework.value === option)
+                      ?.label
+                  : "Select framework..."}
+                <ChevronsDownUp className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className='w-[200px] p-0'>
+              <Command>
+                <CommandInput placeholder='Search framework...' />
+                <CommandList>
+                  <CommandEmpty>No framework found.</CommandEmpty>
+                  <CommandGroup>
+                    {frameworks.map((framework) => (
+                      <CommandItem
+                        key={framework.value}
+                        value={framework.value}
+                        onSelect={(currentValue) => {
+                          setOption(currentValue === option ? "" : currentValue)
+                          setValue("framework", currentValue === option ? "" : currentValue) // ✅ เพิ่มตรงนี้
+                          setOpen(false)
+                        }}
+                      >
+                        {framework.label}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+        <hr className="my-4 border-t border-gray-200" />
+        <Label className="mb-2">Checkbox</Label>
+        <div className="flex items-center space-x-1 mb-0">
+          <Checkbox id="check1" checked={watch("check1")} onCheckedChange={(val) => setValue("check1", val)} />
+          <Label htmlFor="check1" className="mt-2.5">check1</Label>
+        </div>
+        <div className="flex items-center space-x-1 mb-0">
+        <Checkbox id="check2" checked={watch("check2")} onCheckedChange={(val) => setValue("check2", val)} />
+          <Label htmlFor="check1" className="mt-2.5">check2</Label>
+        </div>
+        <hr className="my-4 border-t border-gray-200" />
+        <div>
+        <DatePicker
+        selected={date}
+        onChange={(d) => setDate(d)}
+        showTimeSelect
+        timeIntervals={30} // ✅ เลือกเวลาได้ละเอียดทุก 5 นาที
+        timeFormat="HH:mm"
+        dateFormat="yyyy-MM-dd HH:mm"
+        className="w-full border border-input bg-background rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"          
+      />
+        </div>
+        <div>
+        <Popover open={open2} onOpenChange={setOpen2}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className="w-[240px] justify-between">
+          {selectedLabels || "Select items"}
+          <Check className="ml-2 h-4 w-4 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[240px] p-0">
+        <Command>
+          <CommandInput placeholder="Search items..." />
+          <CommandList>
+            <CommandGroup>
+              {items.map((item) => (
+                <CommandItem
+                  key={item.value}
+                  onSelect={() => toggleSelect(item.value)}
+                >
+                  <Checkbox
+                    checked={selected.includes(item.value)}
+                    className="mr-2"
+                  />
+                  {item.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+        </div>
         <div>
         <Select options={items} />
         </div>

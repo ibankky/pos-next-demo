@@ -22,7 +22,7 @@ export default function SelectWithController({
       name={name}
       control={control}
       render={({ field }) => {
-        const selectOptions = options.map((opt) => ({
+        const selectOptions = (Array.isArray(options) ? options : []).map((opt) => ({
           label: getOptionLabel(opt),
           value: getOptionValue(opt),
         }));
