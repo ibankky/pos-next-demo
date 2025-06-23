@@ -11,7 +11,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 
 export default function DataTable({ columns, data , pageCount , pagination,
-  setPagination, }) {
+  setPagination, isLoading }) {
   const [globalFilter, setGlobalFilter] = useState("");
 
   const table = useReactTable({
@@ -45,6 +45,11 @@ export default function DataTable({ columns, data , pageCount , pagination,
         onChange={(e) => setGlobalFilter(e.target.value)}
       />
       <div className='rounded-md border'>
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white/70 z-10">
+          <div className="loader" />
+        </div>
+      )}
         <table className='w-full table-auto border-collapse'>
           <thead className='bg-gray-100'>
             {table.getHeaderGroups().map((group) => (

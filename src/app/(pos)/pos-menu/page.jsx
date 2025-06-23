@@ -133,6 +133,7 @@ export default function PosMenu() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [dataCount , setDataCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -192,6 +193,7 @@ export default function PosMenu() {
 
   const fetchPosMenu = async (pageIndex = 0, pageSize = 10) => {
     try {
+      setIsLoading(true);
       const page = pageIndex + 1; // pageIndex เริ่มที่ 0 แต่ API อาจเริ่มที่ 1
       const res = await fetch(`/api/pos-menu/list?page=${page}&limit=${pageSize}`);
   
@@ -204,6 +206,8 @@ export default function PosMenu() {
       setPageCount(Math.ceil(json.data.totalCount / pageSize)); // กรณีมี pagination UI
     } catch (err) {
       console.error("Error loading POS menu:", err);
+    }finally {
+      setIsLoading(false); // 👉 โหลดเสร็จไม่ว่า success หรือ error
     }
   };
 
@@ -549,6 +553,7 @@ export default function PosMenu() {
           pagination={pagination}
           setPagination={setPagination}
           pageCount={pageCount}
+          isLoading={isLoading}
         />
       </div>
     </div>
