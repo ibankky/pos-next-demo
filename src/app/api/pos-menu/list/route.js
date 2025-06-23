@@ -3,8 +3,9 @@ export async function GET(req) {
 
   const page = searchParams.get("page") || "1";
   const limit = searchParams.get("limit") || "10";
+  const search = searchParams.get("search") || '';
 
-  const res = await fetch(`http://139.59.223.142/api/pos-menu/list?page=${page}&limit=${limit}`, {
+  const res = await fetch(`http://139.59.223.142/api/pos-menu/list?search=${search}&page=${page}&limit=${limit}`, {
     method: "GET",
     headers: {
       Accept: "application/json",

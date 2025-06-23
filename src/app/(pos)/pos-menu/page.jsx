@@ -189,13 +189,13 @@ export default function PosMenu() {
 
   useEffect(() => {
     fetchPosMenu(pagination.pageIndex, pagination.pageSize);
-  }, [pagination]);
+  }, [pagination , globalFilter]);
 
   const fetchPosMenu = async (pageIndex = 0, pageSize = 10) => {
     try {
       setIsLoading(true);
       const page = pageIndex + 1; // pageIndex เริ่มที่ 0 แต่ API อาจเริ่มที่ 1
-      const res = await fetch(`/api/pos-menu/list?page=${page}&limit=${pageSize}`);
+      const res = await fetch(`/api/pos-menu/list?page=${page}&limit=${pageSize}&search=${globalFilter}`);
   
       if (!res.ok) throw new Error("Failed to fetch POS menu");
   

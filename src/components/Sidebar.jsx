@@ -19,6 +19,7 @@ export default function SidebarMenuWrapper() {
     { id: 2, label: "Orders", value: "/orders" },
     { id: 3, label: "Receipt", value: "/receipt/AA-123" },
     { id: 4, label: "Pos menu", value: "/pos-menu" },
+    { id: 5, label: "settings" , value: '/main'},
   ];
 
   return (
