@@ -132,6 +132,7 @@ export default function PosMenu() {
   const [dayCount, setDayCount] = useState("");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [dataCount , setDataCount] = useState(0);
 
   useEffect(() => {
     const fetchBranches = async () => {
@@ -177,27 +178,34 @@ export default function PosMenu() {
       }
     };
 
-    const fetchPosMenu = async (pageIndex = 0, pageSize = 10) => {
-      try {
-        const page = pageIndex + 1; // pageIndex เริ่มที่ 0 แต่ API อาจเริ่มที่ 1
-        const res = await fetch(`/api/pos-menu/list?page=${page}&limit=${pageSize}`);
     
-        if (!res.ok) throw new Error("Failed to fetch POS menu");
-    
-        const json = await res.json();
-        setMenuData(json.data.result || []);
-        //setPageCount(Math.ceil(json.data.total / pageSize)); // กรณีมี pagination UI
-      } catch (err) {
-        console.error("Error loading POS menu:", err);
-      }
-    };
 
     fetchBranches();
     fetchBranchGroups();
     fetchCardType();
     fetchGroupMenu();
-    fetchPosMenu();
   }, []);
+
+  useEffect(() => {
+    fetchPosMenu(pagination.pageIndex, pagination.pageSize);
+  }, [pagination]);
+
+  const fetchPosMenu = async (pageIndex = 0, pageSize = 10) => {
+    try {
+      const page = pageIndex + 1; // pageIndex เริ่มที่ 0 แต่ API อาจเริ่มที่ 1
+      const res = await fetch(`/api/pos-menu/list?page=${page}&limit=${pageSize}`);
+  
+      if (!res.ok) throw new Error("Failed to fetch POS menu");
+  
+      const json = await res.json();
+      setMenuData(json.data.result || []);
+      console.log('total data');
+      console.log(json.data.totalCount)
+      setPageCount(Math.ceil(json.data.totalCount / pageSize)); // กรณีมี pagination UI
+    } catch (err) {
+      console.error("Error loading POS menu:", err);
+    }
+  };
 
   const {
     register,
@@ -237,21 +245,17 @@ export default function PosMenu() {
     let expireDateString = null;
     let startDateString = startDate ? startDate.toISOString() : null;
     let endDateString = endDate ? endDate.toISOString() : null;
+  
     if (radioOption === "fixed-day") {
-      if (expireDate) {
-        expireDateString = expireDate.toISOString();
-      } else {
-        expireDateString = null;
-      }
+      expireDateString = expireDate ? expireDate.toISOString() : null;
     } else if (radioOption === "day") {
       if (dayCount) {
         const now = new Date();
         now.setDate(now.getDate() + Number(dayCount));
         expireDateString = now.toISOString();
-      } else {
-        expireDateString = null;
       }
     }
+  
     const formData = {
       ...data,
       card_expire_date: expireDateString,
@@ -260,31 +264,37 @@ export default function PosMenu() {
       bonus_expire_date: null,
       machine_group_id: null,
     };
+  
     setSubmittedData(formData);
+  
     try {
       const res = await fetch("/api/pos-menu", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData), // ใส่ข้อมูลที่ต้องการส่ง
+        body: JSON.stringify(formData),
       });
-
+  
       if (!res.ok) throw new Error("Failed to save pos menu");
-
+  
       const result = await res.json();
-
+  
       toast("บันทึกสำเร็จ", {
         className: "bg-green-100 text-green-900 border border-green-400",
         description: "ระบบได้บันทึกเรียบร้อยแล้ว",
         iconTheme: {
-          primary: "#22c55e", // สีเขียว
+          primary: "#22c55e",
           secondary: "#bbf7d0",
         },
       });
-      fetchPosMenu();
+  
+      // ✅ เรียก fetchPosMenu เพื่อโหลดข้อมูลใหม่
+      fetchPosMenu(pagination.pageIndex, pagination.pageSize);
+  
     } catch (err) {
       toast.error("เกิดข้อผิดพลาด");
+      console.error(err);
     }
   };
 

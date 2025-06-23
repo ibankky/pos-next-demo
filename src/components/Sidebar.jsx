@@ -17,8 +17,8 @@ export default function SidebarMenuWrapper() {
   const sidebarMenu = [
     { id: 1, label: "Home", value: "/topup" },
     { id: 2, label: "Orders", value: "/orders" },
-    { id: 3, label: "Settings", value: "/settings" },
-    { id: 4, label: "Receipt", value: "/receipt/AA-123" },
+    { id: 3, label: "Receipt", value: "/receipt/AA-123" },
+    { id: 4, label: "Pos menu", value: "/pos-menu" },
   ];
 
   return (
