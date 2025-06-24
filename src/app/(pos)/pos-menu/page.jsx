@@ -526,6 +526,7 @@ export default function PosMenu() {
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className={field.value ? "bg-green-500" : "bg-gray-300"}
                   />
                 </div>
               )}
@@ -554,6 +555,8 @@ export default function PosMenu() {
           setPagination={setPagination}
           pageCount={pageCount}
           isLoading={isLoading}
+          isSearch={true}
+          isPagination={true}
         />
       </div>
     </div>

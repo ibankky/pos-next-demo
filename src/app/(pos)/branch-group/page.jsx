@@ -50,7 +50,7 @@ export default function BranchGroupListPage() {
       accessorKey: "group_name",
       cell: (info) => info.getValue(),
     },
-    {
+   /*  {
         header: "Sub branch",
         accessorKey: "sub_location_codes",
         cell: (info) => {
@@ -67,7 +67,7 @@ export default function BranchGroupListPage() {
 
           );
         },
-      },
+      }, */
     {
       header: "สถานะ",
       accessorKey: "is_active",

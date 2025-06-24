@@ -19,6 +19,8 @@ export default function DataTable({
   isLoading,
   globalFilter,
   setGlobalFilter,
+  isSearch,
+  isPagination
 }) {
 
   const table = useReactTable({
@@ -48,11 +50,14 @@ export default function DataTable({
 
   return (
     <div className='space-y-4'>
-      <Input
+      {isSearch && (
+        <Input
         placeholder="ค้นหา..."
         value={globalFilter}
         onChange={(e) => setGlobalFilter(e.target.value)}
       />
+      )}
+      
       <div className='rounded-md border'>
         {isLoading && (
           <div className='fixed inset-0 flex items-center justify-center bg-white/70 z-10'>
