@@ -48,7 +48,7 @@ export default function TopUpPage() {
 
   return (
     <div className='p-6'>
-      <h1 className='text-xl font-bold mb-4'>Enter Cash Received</h1>
+      <h1 className='text-xl font-bold mb-4'>เติมเงินทั่วไป</h1>
       <div className='flex items-start justify-center gap-x-6'>
         <div className='w-1/4'>
           <NumericKeypad onConfirm={handleConfirm} />

@@ -6,6 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import SelectWithController from "@/components/SelectWithController";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 import "@/styles/loading.css";
 
 export default function BranchGroupDetailPage() {
@@ -58,9 +59,45 @@ export default function BranchGroupDetailPage() {
     fetchBranch();
   }, [id, reset]);
 
-  const onSubmit = (formData) => {
+  const onSubmit = async (formData) => {
     console.log("Save:", formData);
     // TODO: POST/PUT to API
+    try {
+        const res = await fetch(`/api/branch-group/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Basic YWRtaW46MTIzNA==", // Basic Auth (admin:1234)
+          },
+          body: JSON.stringify({
+            branch_list: formData.sub_location_codes,
+            group_name: formData.group_name,
+            is_active: formData.is_active,
+          }),
+        });
+    
+        if (!res.ok) {
+          const error = await res.json();
+          console.error("API Error:", error);
+          toast.error("เกิดข้อผิดพลาด");
+          return;
+        }
+    
+        const data = await res.json();
+        console.log("Updated successfully:", data);
+        toast("บันทึกสำเร็จ", {
+            className: "bg-green-100 text-green-900 border border-green-400",
+            description: "ระบบได้บันทึกเรียบร้อยแล้ว",
+            iconTheme: {
+              primary: "#22c55e",
+              secondary: "#bbf7d0",
+            },
+          });
+      } catch (err) {
+        console.error("Request failed:", err);
+        toast.error("เกิดข้อผิดพลาด");
+      }
   };
 
   const locationOptions = (branchList || []).map((branch) => ({
