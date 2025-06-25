@@ -1,32 +1,52 @@
 'use client';
 
 import { useState } from 'react';
+import { Delete, Plus, Minus, Dot, PlusCircle } from 'lucide-react';
 
 export default function NumericKeypad({ onConfirm }) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState('1000.00'); // ตั้งค่า default ตามภาพ
 
   const handlePress = (key) => {
-    if (key === 'C') return setValue('');
     if (key === '←') return setValue((prev) => prev.slice(0, -1));
+    if (key === '.') {
+      if (value.includes('.')) return;
+      return setValue((prev) => prev + '.');
+    }
+    if (key === 'C') return setValue('');
     setValue((prev) => prev + key);
   };
 
   return (
-    <div className="space-y-4">
-      <div className="text-2xl text-center bg-white p-2 border rounded">{value || '0'}</div>
-      <div className="grid grid-cols-3 gap-2">
-        {['1','2','3','4','5','6','7','8','9','0','←','C'].map(k => (
-          <button key={k} onClick={() => handlePress(k)} className="bg-blue-500 text-white py-2 rounded">
-            {k}
-          </button>
+    <div className="inline-block bg-gray-100 p-4 rounded-lg space-y-4 w-full">
+      {/* Display */}
+      <div className="text-3xl font-bold text-purple-600 text-center border-2 border-purple-500 rounded-lg py-2 px-4">
+        {value || '0'}
+      </div>
+
+      {/* Keypad Grid */}
+      <div className="grid grid-cols-4 gap-2">
+        {['1','2','3','←','4','5','6','+','7','8','9','-','0','.','Add'].map((key) => (
+          <button
+          key={key}
+          onClick={() => {
+            if (key === 'Add') return onConfirm(value);
+            handlePress(key);
+          }}
+          className={`py-4 rounded-lg font-bold text-xl ${
+            key === 'Add'
+              ? 'bg-violet-600 text-white col-span-2'
+              : 'bg-white text-black'
+          } flex items-center justify-center`}
+        >
+          {/* 🔁 แสดง icon แทนตัวอักษร */}
+          {{
+            '←': <Delete size={24} />,
+            '+': <Plus size={24} />,
+            '-': <Minus size={24} />,
+          }[key] || key}
+        </button>
         ))}
       </div>
-      <button
-        onClick={() => onConfirm(value)}
-        className="w-full bg-green-600 text-white py-3 rounded"
-      >
-        Confirm
-      </button>
     </div>
   );
 }

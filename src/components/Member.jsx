@@ -38,49 +38,49 @@ export default function MemberSidebar() {
           </Button>
         </div>
         <div>
-          <div class='border rounded-md  shadow-md'>
-            <div class='p-2 border-b'>
-              <div class='text-sm font-semibold '>Card :</div>
-              <div class='text-xl text-purple-600 font-bold text-center'>
+          <div className='border rounded-md  shadow-md'>
+            <div className='p-2 border-b'>
+              <div className='text-sm font-semibold '>Card :</div>
+              <div className='text-xl text-purple-600 font-bold text-center'>
                 Card ID
               </div>
             </div>
 
-            <div class='p-2 border-b'>
-              <div class='text-sm font-semibold'>ecoin :</div>
-              <div class='flex justify-center gap-4 mt-1 text-purple-600 font-bold text-xl'>
+            <div className='p-2 border-b'>
+              <div className='text-sm font-semibold'>ecoin :</div>
+              <div className='flex justify-center gap-4 mt-1 text-purple-600 font-bold text-xl'>
                 <span>0</span>
                 <span>0</span>
               </div>
             </div>
-            <button class='w-full py-2  bg-violet-600 text-white font-bold rounded-md border-2 border-cyan-400 shadow'>
+            <button className='w-full py-2  bg-violet-600 text-white font-bold rounded-md border-2 border-cyan-400 shadow'>
               Check
             </button>
           </div>
         </div>
         <div>
-          <div class='rounded-md text-center'>
-            <div class='p-2 border-2 border-purple-500 rounded-xl m-2'>
-              <div class='text-sm font-semibold'>ราคา :</div>
-              <div class='text-3xl font-extrabold text-purple-600'>0</div>
+          <div className='rounded-md text-center'>
+            <div className='p-2 border-2 border-purple-500 rounded-xl m-2'>
+              <div className='text-sm font-semibold'>ราคา :</div>
+              <div className='text-3xl font-extrabold text-purple-600'>0</div>
             </div>
 
-            <div class='p-2 border'>
-              <div class='text-sm font-semibold'>ecoin :</div>
-              <div class='flex justify-center gap-6 mt-1 text-purple-600 font-bold text-xl'>
+            <div className='p-2 border'>
+              <div className='text-sm font-semibold'>ecoin :</div>
+              <div className='flex justify-center gap-6 mt-1 text-purple-600 font-bold text-xl'>
                 <span>0</span>
                 <span>0</span>
               </div>
             </div>
 
-            <div class='p-2 border'>
-              <div class='text-sm font-semibold'>Token :</div>
-              <div class='text-purple-600 font-bold text-xl'>0</div>
+            <div className='p-2 border'>
+              <div className='text-sm font-semibold'>Token :</div>
+              <div className='text-purple-600 font-bold text-xl'>0</div>
             </div>
 
-            <div class='p-2 border'>
-              <div class='text-sm font-semibold'>Free Point :</div>
-              <div class='text-purple-600 font-bold text-xl'>0</div>
+            <div className='p-2 border'>
+              <div className='text-sm font-semibold'>Free Point :</div>
+              <div className='text-purple-600 font-bold text-xl'>0</div>
             </div>
           </div>
         </div>

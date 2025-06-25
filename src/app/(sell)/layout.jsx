@@ -12,7 +12,7 @@ export default function SellLayout({ children }) {
 
         {/* Content */}
         <div className='flex flex-1'>
-          <div className="flex-1 p-4 overflow-auto">{children}</div>
+          <div className="flex-1 p-4 overflow-auto bg-gray-100">{children}</div>
           <MemberSidebar />
         </div>
       </main>
