@@ -10,6 +10,13 @@ export default function TopUpPage() {
   const [loading, setLoading] = useState(true);
   const [groupMenus, setGroupMenus] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
+  const [menuData , setMenuData] = useState([]);
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [pageCount, setPageCount] = useState(1);
+  const [selectedItem, setSelectedItem] = useState([])
 
   useEffect(() => {
     const fetchGroupMenu = async () => {
@@ -34,13 +41,18 @@ export default function TopUpPage() {
   }, [groupMenus, selectedId]);
 
   useEffect(() => {
-    fetchMenuDataList();
+    if(selectedId){
+      fetchMenuDataList();
+    }
+    
   }, [selectedId]);
 
   const fetchMenuDataList = async () => {
     try {
       const res = await fetch(`/api/pos-menu/sale/list?location=ccb&groupMenuId=${selectedId}`);
-      console.log(res.json)
+      if (!res.ok) throw new Error("Failed to fetch branches");
+        const json = await res.json();
+        setMenuData(json.data.result)
     }catch(err){
       console.error("Error loading menuDataList:", err);
     }
@@ -57,24 +69,85 @@ export default function TopUpPage() {
     console.log("Confirmed amount:", val);
   };
 
-  const rows = [
+  const handleSelectedItem = (newItem) => {
+    setSelectedItem((prevItems) => {
+      const existingIndex = prevItems.findIndex((item) => item.menu_id === newItem.menu_id);
+  
+      if (existingIndex !== -1) {
+        // ถ้ามีอยู่แล้ว: เพิ่ม qty + รวมยอด
+        const updatedItems = [...prevItems];
+        const existing = updatedItems[existingIndex];
+        const newQty = existing.qty ? existing.qty + 1 : 2; // default ถ้ายังไม่มี qty คือ 2
+  
+        updatedItems[existingIndex] = {
+          ...existing,
+          qty: newQty,
+          totalprice: (newItem.e_coin ?? 0) * newQty,
+          totalecoin: (newItem.e_coin ?? 0) * newQty,
+          totalebonus: (newItem.e_bonus ?? 0) * newQty,
+          totaltoken: (newItem.token ?? 0) * newQty,
+        };
+  
+        return updatedItems;
+      } else {
+        // ถ้ายังไม่มี: เพิ่มใหม่พร้อม qty = 1
+        return [
+          ...prevItems,
+          {
+            ...newItem,
+            qty: 1,
+            totalprice: newItem.e_coin ?? 0,
+            totalecoin: newItem.e_coin ?? 0,
+            totalebonus: newItem.e_bonus ?? 0,
+            totaltoken: newItem.token ?? 0,
+          },
+        ];
+      }
+    });
+  };
+  
+
+  const columns = [
     {
-      date: "05/12/2024 11:59",
-      number: "JB-67-241200234",
-      card: "DD241D69",
-      member: "0000000000",
-      price: 80,
-      credit: 80,
+      header: "รายการ",
+      accessorKey: "menu_name",
+      cell: (info) => info.getValue(),
     },
     {
-      date: "05/12/2024 11:58",
-      number: "JB-67-241200233",
-      card: "9751B04E",
-      member: "0807067977",
-      price: 500,
-      credit: 500,
+      header: "ราคา",
+      accessorKey: "price",
+      cell: (info) => info.getValue(),
+    },
+    {
+      header: "ecoin",
+      accessorKey: "e_coin",
+      cell: (info) => info.getValue(),
+    },
+    {
+      header: "eBonus",
+      accessorKey: "e_bonus",
+      cell: (info) => info.getValue(),
+    },
+    {
+      header: "Token",
+      accessorKey: "token",
+      cell: (info) => info.getValue(),
     },
   ];
+
+  const rows = selectedItem.map((item, index) => ({
+    name: `รายการ ${item.group_menu_name ?? "-"} ${item.code ?? index + 1}`,
+    qty: item.qty ?? 1,
+    price: item.e_coin ?? 0,
+    ecoin: item.e_coin ?? 0,
+    ebonus: item.e_bonus ?? 0,
+    token: 0,
+    totalprice: (item.e_coin ?? 0) * item.qty,
+    totalecoin: (item.e_coin ?? 0) * item.qty,
+    totalebonus: (item.e_bonus ?? 0) * item.qty,
+    totaltoken: 0,
+  }));
+  
 
   /* if (loading) {
     return (
@@ -110,7 +183,18 @@ export default function TopUpPage() {
           ))}
           </div>
           <div className='mt-2 bg-white min-h-96'>
-            
+            <DataTable
+                      columns={columns}
+                      data={menuData}
+                     
+                      pagination={pagination}
+                      setPagination={setPagination}
+                      pageCount={pageCount}
+                      isPagination={true}
+                      onRowClick={(rowData) => {
+                        handleSelectedItem(rowData)
+                      }}
+                    />
           </div>
         </div>
       </div>

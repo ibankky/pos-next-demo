@@ -20,7 +20,9 @@ export default function DataTable({
   globalFilter,
   setGlobalFilter,
   isSearch,
-  isPagination
+  isPagination,
+  onRowClick,
+  selectedItems = [],
 }) {
 
   const table = useReactTable({
@@ -81,7 +83,13 @@ export default function DataTable({
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className='hover:bg-gray-50'>
+             <tr
+             key={row.id}
+             className='hover:bg-gray-50 cursor-pointer'
+             onClick={() => {
+              onRowClick?.(row.original);
+             }}
+           >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className='px-4 py-2 border-t text-sm'>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

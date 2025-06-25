@@ -1,22 +1,20 @@
 'use client';
 
-export default function Tables({ rows = [] }) {
+export default function Tables({ rows = [] , }) {
   if (!rows.length) return <div className="text-center py-4 text-gray-500">No data</div>;
 
+  console.log(rows)
   const headers = Object.keys(rows[0]);
-
+  
   const columnNames = {
-    date: 'วันที่',
-    number: 'เลขที่',
-    card: 'Card No.',
-    member: 'สมาชิก',
+    menu_name: 'รายการ',
     price: 'ราคา',
-    credit: 'เครดิต',
-    bonus: 'โบนัส',
-    token: 'Token',
-    branch: 'สาขา',
-    pos: 'POS',
-    cashier: 'แคชเชียร์',
+    e_coin: 'ecoin',
+    e_bonus: 'eBonus',
+    token: 'token',
+    price: 'ราคารวม',
+    e_coin: 'รวมecoin',
+    e_bonus: 'รวมeBonus',
   };
 
   return (
