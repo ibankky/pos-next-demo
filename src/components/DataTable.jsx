@@ -66,12 +66,13 @@ export default function DataTable({
             <div className='loader' />
           </div>
         )}
+        <div className="overflow-y-auto max-h-80">
         <table className='w-full table-auto border-collapse'>
           <thead className='bg-gray-100'>
             {table.getHeaderGroups().map((group) => (
               <tr key={group.id}>
                 {group.headers.map((header) => (
-                  <th key={header.id} className='px-4 py-2 text-left text-sm'>
+                  <th key={header.id} className='sticky top-0 bg-gray-100 px-4 py-2 text-left text-sm z-10'>
                     {flexRender(
                       header.column.columnDef.header,
                       header.getContext()
@@ -99,6 +100,7 @@ export default function DataTable({
             ))}
           </tbody>
         </table>
+        </div>
       </div>
       {data.length > 0 && (
       <div className='flex items-center justify-between mt-4 flex-wrap gap-2'>

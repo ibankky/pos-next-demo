@@ -2,8 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { LogOut, X } from "lucide-react";
+import { usePosStore } from "@/store";
 
 export default function MemberSidebar() {
+  const totalAmount = usePosStore((state) => state.totalAmount);
+  const totalecoin = usePosStore((state) => state.totalecoin)
+  const totalebonus = usePosStore((state) => state.totalebonus)
   return (
     <div className='flex flex-col h-[95%] w-64 p-4 bg-white justify-between mt-1'>
       {/* ส่วนบน */}
@@ -67,19 +71,19 @@ export default function MemberSidebar() {
           <div className='rounded-md text-center'>
             <div className='p-2 border-2 border-purple-500 rounded-xl m-2'>
               <div className='text-sm font-semibold'>ราคา :</div>
-              <div className='text-3xl font-extrabold text-purple-600'>0</div>
+              <div className='text-3xl font-extrabold text-purple-600'>{totalAmount}</div>
             </div>
 
             <div className='p-2 border'>
               <div className='text-sm font-semibold'>ecoin :</div>
               <div className='flex justify-center gap-6 mt-1 text-purple-600 font-bold text-xl'>
-                <span>0</span>
+                <span>{totalecoin}</span>
               </div>
             </div>
 
             <div className='p-2 border'>
               <div className='text-sm font-semibold'>ebonus :</div>
-              <div className='text-purple-600 font-bold text-xl'>0</div>
+              <div className='text-purple-600 font-bold text-xl'>{totalebonus}</div>
             </div>
 
             <div className='p-2 border'>

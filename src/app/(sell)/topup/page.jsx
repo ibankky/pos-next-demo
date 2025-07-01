@@ -20,10 +20,7 @@ export default function TopUpPage() {
   const [pageCount, setPageCount] = useState(1);
   const [selectedItem, setSelectedItem] = useState([]);
   const [topupMenu , setTopupMenu] = useState({});
-  const totalAmount = usePosStore((state) => state.totalAmount);
-  const selectedItems = usePosStore((state) => state.selectedItems);
-  const addItem = usePosStore((state) => state.addItem);
-  const clearItems = usePosStore((state) => state.clearItems);
+  const { addItem, selectedItems, totalAmount , clearItems  , totalecoin , totalebonus} = usePosStore();
   const state = usePosStore();
 
   useEffect(() => {
@@ -94,44 +91,11 @@ export default function TopUpPage() {
   };
 
   const handleSelectedItem = (newItem) => {
-    console.log('state');
-    console.log(state.selectedItems)
-    setSelectedItem((prevItems) => {
-      const existingIndex = prevItems.findIndex(
-        (item) => item.menu_id === newItem.menu_id
-      );
-
-      if (existingIndex !== -1) {
-        // ถ้ามีอยู่แล้ว: เพิ่ม qty + รวมยอด
-        const updatedItems = [...prevItems];
-        const existing = updatedItems[existingIndex];
-        const newQty = existing.qty ? existing.qty + 1 : 2; // default ถ้ายังไม่มี qty คือ 2
-
-        updatedItems[existingIndex] = {
-          ...existing,
-          qty: newQty,
-          totalprice: (newItem.e_coin ?? 0) * newQty,
-          totalecoin: (newItem.e_coin ?? 0) * newQty,
-          totalebonus: (newItem.e_bonus ?? 0) * newQty,
-          totaltoken: (newItem.token ?? 0) * newQty,
-        };
-
-        return updatedItems;
-      } else {
-        // ถ้ายังไม่มี: เพิ่มใหม่พร้อม qty = 1
-        return [
-          ...prevItems,
-          {
-            ...newItem,
-            qty: 1,
-            totalprice: newItem.e_coin ?? 0,
-            totalecoin: newItem.e_coin ?? 0,
-            totalebonus: newItem.e_bonus ?? 0,
-            totaltoken: newItem.token ?? 0,
-          },
-        ];
-      }
-    });
+    addItem(newItem);
+    console.log("selectedItems", selectedItems);
+    console.log("totalAmount", totalAmount);
+    console.log("ecoin" , totalecoin)
+    console.log("ebonus" , totalebonus)
   };
 
   const columns = [
@@ -180,7 +144,7 @@ export default function TopUpPage() {
     },
   ];
 
-  const rows = selectedItem.map((item, index) => ({
+  const rows = selectedItems.map((item, index) => ({
     name: `รายการที่ ${index+1} ${"[ "+item.group_menu_name+" ]" ?? "-"} ${item.menu_name ?? item.code}`,
     qty: item.qty ?? 1,
     price: item.e_coin ?? 0,
@@ -226,7 +190,8 @@ export default function TopUpPage() {
               </Button>
             ))}
           </div>
-          <div className="mt-2 bg-white min-h-80 overflow-x-scroll max-h-80">
+          <div className="mt-2 bg-white min-h-80 overflow-auto max-h-80">
+          <div className="min-w-full">
             <DataTable
               columns={columns}
               data={menuData}
@@ -238,6 +203,7 @@ export default function TopUpPage() {
                 handleSelectedItem(rowData);
               }}
             />
+            </div>
           </div>
         </div>
       </div>
