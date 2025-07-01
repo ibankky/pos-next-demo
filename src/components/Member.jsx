@@ -38,7 +38,7 @@ export default function MemberSidebar() {
           </Button>
         </div>
         <div>
-          <div className='border rounded-md  shadow-md'>
+          <div className='border rounded-md  shadow-md  text-center'>
             <div className='p-2 border-b'>
               <div className='text-sm font-semibold '>Card :</div>
               <div className='text-xl text-purple-600 font-bold text-center'>
@@ -47,9 +47,14 @@ export default function MemberSidebar() {
             </div>
 
             <div className='p-2 border-b'>
-              <div className='text-sm font-semibold'>ecoin :</div>
-              <div className='flex justify-center gap-4 mt-1 text-purple-600 font-bold text-xl'>
+              <div className='text-sm font-semibold '>ecoin :</div>
+              <div className='text-xl text-purple-600 font-bold text-center'>
                 <span>0</span>
+              </div>
+            </div>
+            <div className='p-2 border-b'>
+              <div className='text-sm font-semibold'>ebonus :</div>
+              <div className='text-xl text-purple-600 font-bold text-center'>
                 <span>0</span>
               </div>
             </div>
@@ -69,12 +74,11 @@ export default function MemberSidebar() {
               <div className='text-sm font-semibold'>ecoin :</div>
               <div className='flex justify-center gap-6 mt-1 text-purple-600 font-bold text-xl'>
                 <span>0</span>
-                <span>0</span>
               </div>
             </div>
 
             <div className='p-2 border'>
-              <div className='text-sm font-semibold'>Token :</div>
+              <div className='text-sm font-semibold'>ebonus :</div>
               <div className='text-purple-600 font-bold text-xl'>0</div>
             </div>
 
