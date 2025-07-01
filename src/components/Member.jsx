@@ -71,19 +71,19 @@ export default function MemberSidebar() {
           <div className='rounded-md text-center'>
             <div className='p-2 border-2 border-purple-500 rounded-xl m-2'>
               <div className='text-sm font-semibold'>ราคา :</div>
-              <div className='text-3xl font-extrabold text-purple-600'>{totalAmount}</div>
+              <div className='text-3xl font-extrabold text-purple-600'>{totalAmount ? Number(totalAmount).toLocaleString() : '0'}</div>
             </div>
 
             <div className='p-2 border'>
               <div className='text-sm font-semibold'>ecoin :</div>
               <div className='flex justify-center gap-6 mt-1 text-purple-600 font-bold text-xl'>
-                <span>{totalecoin}</span>
+                <span>{totalecoin ? Number(totalecoin).toLocaleString() : '0'}</span>
               </div>
             </div>
 
             <div className='p-2 border'>
               <div className='text-sm font-semibold'>ebonus :</div>
-              <div className='text-purple-600 font-bold text-xl'>{totalebonus}</div>
+              <div className='text-purple-600 font-bold text-xl'>{totalebonus ? Number(totalebonus).toLocaleString() : '0'}</div>
             </div>
 
             <div className='p-2 border'>

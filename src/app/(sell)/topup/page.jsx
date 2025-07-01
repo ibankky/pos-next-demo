@@ -88,14 +88,19 @@ export default function TopUpPage() {
   const handleConfirm = (val) => {
     console.log("Confirmed amount:", val);
     console.log(topupMenu)
+    const topupNew = {
+      ...topupMenu,     // copy properties จาก topupMenu
+      price: Number(val),
+      group_menu_name : "เติมเงิน",
+      menu_id : topupMenu.id,
+      menu_name : topupMenu.description,
+    };
+    console.log(topupNew)
+    addItem(topupNew);
   };
 
   const handleSelectedItem = (newItem) => {
     addItem(newItem);
-    console.log("selectedItems", selectedItems);
-    console.log("totalAmount", totalAmount);
-    console.log("ecoin" , totalecoin)
-    console.log("ebonus" , totalebonus)
   };
 
   const columns = [
@@ -147,10 +152,10 @@ export default function TopUpPage() {
   const rows = selectedItems.map((item, index) => ({
     name: `รายการที่ ${index+1} ${"[ "+item.group_menu_name+" ]" ?? "-"} ${item.menu_name ?? item.code}`,
     qty: item.qty ?? 1,
-    price: item.e_coin ?? 0,
+    price: item.price ?? 0,
     ecoin: item.e_coin ?? 0,
     ebonus: item.e_bonus ?? 0,
-    totalprice: (item.e_coin ?? 0) * item.qty,
+    totalprice: (item.price ?? 0) * item.qty,
     totalecoin: (item.e_coin ?? 0) * item.qty,
     totalebonus: (item.e_bonus ?? 0) * item.qty,
   }));

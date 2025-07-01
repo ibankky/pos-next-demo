@@ -9,9 +9,14 @@ const usePosStore = create((set, get) => ({
   // เพิ่ม item ลงใน selectedItems
   addItem: (newItem) =>
     set((state) => {
+
       const existingIndex = state.selectedItems.findIndex(
-        (item) => item.menu_id === newItem.menu_id
+        (item) => item.menu_id === newItem.menu_id && item.price === newItem.price
       );
+
+      if(newItem.code === 'STD0001'){
+        console.log(' case เติม เงิน');
+      }
 
       let updatedItems;
 
@@ -23,7 +28,7 @@ const usePosStore = create((set, get) => ({
         updated[existingIndex] = {
           ...existing,
           qty: newQty,
-          totalprice: (newItem.e_coin ?? 0) * newQty,
+          totalprice: (newItem.price ?? 0) * newQty,
           totalecoin: (newItem.e_coin ?? 0) * newQty,
           totalebonus: (newItem.e_bonus ?? 0) * newQty,
         };
@@ -35,7 +40,7 @@ const usePosStore = create((set, get) => ({
           {
             ...newItem,
             qty: 1,
-            totalprice: newItem.e_coin ?? 0,
+            totalprice: newItem.price ?? 0,
             totalecoin: newItem.e_coin ?? 0,
             totalebonus: newItem.e_bonus ?? 0,
           },
