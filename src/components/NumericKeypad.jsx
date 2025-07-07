@@ -9,10 +9,6 @@ export default function NumericKeypad({ onConfirm }) {
 
   const handlePress = (key) => {
     if (key === "←") return setValue((prev) => prev.slice(0, -1));
-    if (key === ".") {
-      if (value.includes(".")) return;
-      return setValue((prev) => prev + ".");
-    }
     if (key === "C") return setValue("");
     setValue((prev) => prev + key);
   };
