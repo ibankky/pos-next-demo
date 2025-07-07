@@ -5,7 +5,7 @@ import { Delete, Plus, Minus, Dot, PlusCircle } from "lucide-react";
 import clsx from "clsx";
 
 export default function NumericKeypad({ onConfirm }) {
-  const [value, setValue] = useState("1000"); // ตั้งค่า default ตามภาพ
+  const [value, setValue] = useState("0"); // ตั้งค่า default ตามภาพ
 
   const handlePress = (key) => {
     if (key === "←") return setValue((prev) => prev.slice(0, -1));

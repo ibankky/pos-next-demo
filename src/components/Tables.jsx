@@ -1,21 +1,37 @@
 'use client';
 
+import { Trash } from "lucide-react";
+import { usePosStore } from "@/store";
+
 export default function Tables({ rows = [] , }) {
+  const removeItemByMenuId = usePosStore((state) => state.removeItemByMenuId);
+
+  const handleDeleteRow = (menuId) => {
+    console.log(rows);
+    console.log(menuId)
+    removeItemByMenuId(menuId);
+  };
+  
   if (!rows.length) return <div className="text-center py-4 text-gray-500">No data</div>;
 
-  console.log(rows)
   const headers = Object.keys(rows[0]);
   
   const columnNames = {
-    menu_name: 'รายการ',
+    name: 'รายการ',
     price: 'ราคา',
-    e_coin: 'ecoin',
-    e_bonus: 'eBonus',
+    qty : 'จำนวน',
+    ecoin: 'eCoin',
+    ebonus: 'eBonus',
     token: 'token',
     price: 'ราคารวม',
-    e_coin: 'รวมecoin',
-    e_bonus: 'รวมeBonus',
+    totalecoin: 'รวมeCoin',
+    totalebonus: 'รวมeBonus',
+    totalprice : 'รวมราคา'
   };
+
+  
+
+  
 
   return (
     <div className="overflow-auto border rounded-lg shadow">
@@ -27,6 +43,7 @@ export default function Tables({ rows = [] , }) {
                  {columnNames[key] || key}
               </th>
             ))}
+            <th className="px-4 py-2 text-center"></th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
@@ -42,6 +59,14 @@ export default function Tables({ rows = [] , }) {
                   {row[key]}
                 </td>
               ))}
+              <td className="text-center px-2">
+              <button
+                onClick={() => handleDeleteRow?.(row.menu_id)}
+                className="text-red-600 hover:text-red-800"
+              >
+                 <Trash />
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

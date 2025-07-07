@@ -1,21 +1,28 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 const usePosStore = create((set, get) => ({
-    selectedItems: [],
-    totalAmount: 0,
-    totalebonus: 0,
-    totalecoin : 0,
+  selectedItems: [],
+  totalAmount: 0,
+  totalebonus: 0,
+  totalecoin: 0,
+  memberTelephone: "",
+  cardDataStore: {
+    card_no: "",
+    card_type: "",
+    e_coin: 0,
+    e_bonus: 0,
+  },
 
   // เพิ่ม item ลงใน selectedItems
   addItem: (newItem) =>
     set((state) => {
-
       const existingIndex = state.selectedItems.findIndex(
-        (item) => item.menu_id === newItem.menu_id && item.price === newItem.price
+        (item) =>
+          item.menu_id === newItem.menu_id && item.price === newItem.price
       );
 
-      if(newItem.code === 'STD0001'){
-        console.log(' case เติม เงิน');
+      if (newItem.code === "STD0001") {
+        console.log(" case เติม เงิน");
       }
 
       let updatedItems;
@@ -53,11 +60,11 @@ const usePosStore = create((set, get) => ({
       );
 
       const totalebonus = updatedItems.reduce(
-        (sum, item) => sum + (item.e_bonus ?? 0),
+        (sum, item) => sum + (item.totalebonus ?? 0),
         0
       );
       const totalecoin = updatedItems.reduce(
-        (sum, item) => sum + (item.e_coin ?? 0),
+        (sum, item) => sum + (item.totalecoin ?? 0),
         0
       );
 
@@ -69,7 +76,28 @@ const usePosStore = create((set, get) => ({
       };
     }),
 
-  clearItems: () => set({ selectedItems: [], totalAmount: 0  , totalebonus : 0 , totalecoin : 0}),
+  clearItems: () =>
+    set({ selectedItems: [], totalAmount: 0, totalebonus: 0, totalecoin: 0 }),
+  setCardData: (data) => set({ cardDataStore: data }),
+  clearCardData: () =>
+    set({
+      cardDataStore: {
+        card_no: "",
+        card_type: "",
+      },
+    }),
+  setMemberTelePhone: (data) => set({ memberTelephone: data }),
+  clearTelePhone: () => {
+    set({
+      memberTelephone: "",
+    });
+  },
+  removeItemByMenuId: (menuId) =>
+    set((state) => ({
+      selectedItems: state.selectedItems.filter(
+        (item) => item.menu_id !== menuId
+      ),
+    })),
 }));
 
-export default usePosStore; 
+export default usePosStore;

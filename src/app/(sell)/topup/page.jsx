@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Image } from "lucide-react";
 import DataTable from "@/components/DataTable";
 import { usePosStore } from "@/store";
+import Swal from 'sweetalert2';
 
 export default function TopUpPage() {
   const [loading, setLoading] = useState(true);
@@ -20,7 +21,8 @@ export default function TopUpPage() {
   const [pageCount, setPageCount] = useState(1);
   const [selectedItem, setSelectedItem] = useState([]);
   const [topupMenu , setTopupMenu] = useState({});
-  const { addItem, selectedItems, totalAmount , clearItems  , totalecoin , totalebonus} = usePosStore();
+  const [payments , setPayments] = useState([])
+  const { addItem, selectedItems, totalAmount , clearItems  , cardDataStore , memberTelephone , clearCardData  , clearTelePhone} = usePosStore();
   const state = usePosStore();
 
   useEffect(() => {
@@ -37,6 +39,7 @@ export default function TopUpPage() {
 
     fetchGroupMenu();
     fetchMenuTopup();
+    fetchMasterPayment();
   }, []);
 
   useEffect(() => {
@@ -77,17 +80,37 @@ export default function TopUpPage() {
       console.error("Error loading menuDataList:", err);
     }
   }
-  /* useEffect(() => {
-    const delay = setTimeout(() => {
-      setLoading(false);
-    }, 500);
 
-    return () => clearTimeout(delay);
-  }, []); */
+  const paymentMetaMap = {
+    'Cash':        { color: '#BEE0CF', icon: '/icon/pos.svg' },
+    'Transfer':    { color: '#FEE0A8', icon: '/icon/pos.svg' },
+    'Shopee Pay':  { color: '#F3B0A8', icon: '/icon/pos.svg' },
+    'Credit Card': { color: '#F9DEE8', icon: '/icon/pos.svg' },
+    'Voucher':     { color: '#D3B8D8', icon: '/icon/pos.svg' },
+  };
+
+  const fetchMasterPayment = async () => {
+    try {
+      const res = await fetch(
+        `/api/master/payment`
+      );
+      if (!res.ok) throw new Error("Failed to fetch master payment");
+      const json = await res.json();
+      const paymentData = json.data.map(item => ({
+        ...item,
+        ...paymentMetaMap[item.name] || {
+          color: '#ccc', // fallback
+          icon: '/icon/pos.svg'
+        }
+      }));
+      setPayments(paymentData)
+    } catch (err) {
+      console.error("Error loading master payment:", err);
+    }
+  }
+  
 
   const handleConfirm = (val) => {
-    console.log("Confirmed amount:", val);
-    console.log(topupMenu)
     const topupNew = {
       ...topupMenu,     // copy properties จาก topupMenu
       price: Number(val),
@@ -95,13 +118,109 @@ export default function TopUpPage() {
       menu_id : topupMenu.id,
       menu_name : topupMenu.description,
     };
-    console.log(topupNew)
     addItem(topupNew);
   };
 
   const handleSelectedItem = (newItem) => {
     addItem(newItem);
   };
+
+  const handlePaymentClick = (method) => {
+
+    if (!memberTelephone) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณากรอกเบอร์โทร',
+        text: 'ต้องกรอกเบอร์สมาชิกก่อนดำเนินการ',
+      });
+      return;
+    }
+  
+    if (!cardDataStore?.card_no || !cardDataStore?.card_type) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'ข้อมูลบัตรไม่ครบ',
+        text: 'กรุณาระบุข้อมูลบัตรให้ครบถ้วน',
+      });
+      return;
+    }
+  
+    if (!selectedItems.length) {
+      Swal.fire({
+        icon: 'info',
+        title: 'ยังไม่มีสินค้า',
+        text: 'กรุณาเลือกรายการสินค้าอย่างน้อย 1 รายการ',
+      });
+      return;
+    }
+
+
+    topUpTocard(method);
+    if (method.id === 1) {
+      // ทำอะไรบางอย่างสำหรับ method id 1
+    } else if (method.name === "QR Code") {
+      // ทำอีกอย่าง
+    } else {
+      // default action
+    }
+  };
+
+  const topUpTocard = async (method) => {
+    const payload = {
+      bank_detail: method.name,
+      bill_location: "CCB", //Location get from user login
+      bill_payment_id: method.id,
+      cachier: "admin",  //name from user login
+      card_no: cardDataStore?.card_no,
+      card_type_id: 'd96dca64-e075-416f-a8df-c9423093087c', // find from card type
+      free_point: 0,
+      from_channel: "POS",
+      is_active: true,
+      member_tel: memberTelephone,
+      pos_id: "POS001", // from max addrss search
+      pos_menu_id: 101,
+      pos_type: "topup",
+      products: selectedItems.map((item) => ({
+        product_id: item.menu_id,
+        quantity:
+          item.menu_id === 1
+            ? Math.round(item.totalprice ?? 0) // ใช้ totalprice ถ้าเป็น menu_id 1
+            : item.qty ?? 1,                    // ปกติใช้ qty
+      })),
+    };
+
+    console.log(payload);
+  
+     try {
+      const res = await fetch("/api/card/topup-pos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!res.ok) {
+        const error = await res.json();
+        console.error("Topup failed:", error);
+        return;
+      }
+  
+      const data = await res.json();
+      console.log("Topup success:", data);
+      Swal.fire({
+        icon: 'success',
+        title: 'เติมเงินสำเร็จ',
+        text: 'เติมเงินสำเร็จ',
+      }).then(() => {
+        clearItems();
+        clearCardData();
+        clearTelePhone();
+      });
+    } catch (err) {
+      console.error("Topup error:", err);
+    } 
+  }
 
   const columns = [
     {
@@ -126,28 +245,7 @@ export default function TopUpPage() {
     },
   ];
 
-  const columnsMenu = [
-    {
-      header: "ชื่อ",
-      accessorKey: "menu_name",
-      cell: (info) => info.getValue(),
-    },
-    {
-      header: "จำนวน",
-      accessorKey: "qty",
-      cell: (info) => info.getValue(),
-    },
-    {
-      header: "ecoin",
-      accessorKey: "e_coin",
-      cell: (info) => info.getValue(),
-    },
-    {
-      header: "eBonus",
-      accessorKey: "e_bonus",
-      cell: (info) => info.getValue(),
-    },
-  ];
+
 
   const rows = selectedItems.map((item, index) => ({
     name: `รายการที่ ${index+1} ${"[ "+item.group_menu_name+" ]" ?? "-"} ${item.menu_name ?? item.code}`,
@@ -158,7 +256,10 @@ export default function TopUpPage() {
     totalprice: (item.price ?? 0) * item.qty,
     totalecoin: (item.e_coin ?? 0) * item.qty,
     totalebonus: (item.e_bonus ?? 0) * item.qty,
+    menu_id : item.menu_id
   }));
+
+  
 
   /* if (loading) {
     return (
@@ -203,7 +304,7 @@ export default function TopUpPage() {
               pagination={pagination}
               setPagination={setPagination}
               pageCount={pageCount}
-              isPagination={true}
+              isPagination={false}
               onRowClick={(rowData) => {
                 handleSelectedItem(rowData);
               }}
@@ -225,66 +326,23 @@ export default function TopUpPage() {
           </Button>
         </div>
         <div className="w-3/4 flex gap-10">
-          <div className="w-36 h-30 flex flex-col items-center justify-center bg-[#BEE0CF] rounded-md">
-          <Image
+        {payments.map((method) => (
+            <div
+            key={method.id}
+            className="w-36 h-30 flex flex-col items-center justify-center rounded-md"
+            style={{ backgroundColor: method.color }}
+            onClick={() => handlePaymentClick(method)}
+          >
+            <Image
             src='/icon/pos.svg'
             alt='POS Icon'
             width={30}
             height={30}
             className='rounded'
           />
-            <div className="mt-2 text-xl">รับเงิน</div>
+            <div className="mt-2 text-xl">{method.name}</div>
           </div>
-          <div className="w-36 h-30 flex flex-col items-center justify-center bg-[#A4CCEA] rounded-md">
-          <Image
-            src='/icon/pos.svg'
-            alt='POS Icon'
-            width={30}
-            height={30}
-            className='rounded'
-          />
-            <div className="mt-2 text-xl">รับเงินพอดี</div>
-          </div>
-          <div className="w-36 h-30 flex flex-col items-center justify-center bg-[#FEE0A8] rounded-md">
-          <Image
-            src='/icon/pos.svg'
-            alt='POS Icon'
-            width={30}
-            height={30}
-            className='rounded'
-          />
-            <div className="mt-2 text-xl">โอนเงิน</div>
-          </div>
-          <div className="w-36 h-30 flex flex-col items-center justify-center bg-[#F3B0A8] rounded-md">
-          <Image
-            src='/icon/pos.svg'
-            alt='POS Icon'
-            width={30}
-            height={30}
-            className='rounded'
-          />
-            <div className="mt-2 text-xl">Shoppee Pay</div>
-          </div>
-          <div className="w-36 h-30 flex flex-col items-center justify-center bg-[#F9DEE8] rounded-md">
-          <Image
-            src='/icon/pos.svg'
-            alt='POS Icon'
-            width={30}
-            height={30}
-            className='rounded'
-          />
-            <div className="mt-2 text-xl">บัตรเครดิต</div>
-          </div>
-          <div className="w-36 h-30 flex flex-col items-center justify-center bg-[#D3B8D8] rounded-md">
-          <Image
-            src='/icon/pos.svg'
-            alt='POS Icon'
-            width={30}
-            height={30}
-            className='rounded'
-          />
-            <div className="mt-2 text-xl">Voucher</div>
-          </div>
+        ))}
         </div>
       </div>
     </div>
