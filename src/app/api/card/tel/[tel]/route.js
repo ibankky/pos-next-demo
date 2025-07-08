@@ -2,7 +2,7 @@ export async function GET(req, { params }) {
     const { tel } = await params;
   
     try {
-      const response = await fetch(`http://139.59.223.142/api/card/tel/${tel}`, {
+      const response = await fetch(`http://139.59.223.142/api/member/${tel}`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',

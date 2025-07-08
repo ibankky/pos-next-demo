@@ -5,16 +5,17 @@ import { usePosStore } from "@/store";
 
 export default function Tables({ rows = [] , }) {
   const removeItemByMenuId = usePosStore((state) => state.removeItemByMenuId);
+  const updateItemQty = usePosStore((state) => state.updateItemQty);
 
   const handleDeleteRow = (menuId) => {
-    console.log(rows);
-    console.log(menuId)
     removeItemByMenuId(menuId);
   };
   
   if (!rows.length) return <div className="text-center py-4 text-gray-500">No data</div>;
 
-  const headers = Object.keys(rows[0]);
+  console.log('row 0');
+  console.log(rows[0]);
+  const headers = Object.keys(rows[0]).filter((key) => key !== "menu_id");
   
   const columnNames = {
     name: 'รายการ',
@@ -50,14 +51,26 @@ export default function Tables({ rows = [] , }) {
           {rows.map((row, index) => (
             <tr key={index} className="hover:bg-gray-50">
               {headers.map((key) => (
-                <td
-                  key={key}
-                  className={`px-4 py-2 ${
-                    key === 'member' ? 'text-blue-600 underline cursor-pointer' : ''
-                  } ${typeof row[key] === 'number' ? 'text-right' : ''}`}
-                >
-                  {row[key]}
-                </td>
+               <td
+               key={key}
+               className={`px-4 py-2 ${
+                 typeof row[key] === "number" ? "text-right" : ""
+               }`}
+             >
+               {key === "qty" ? (
+                 <input
+                   type="number"
+                   value={row[key]}
+                   min={1}
+                   onChange={(e) =>
+                     updateItemQty(row.menu_id, parseInt(e.target.value) || 1)
+                   }
+                   className="w-16 border rounded px-2 py-1 text-right"
+                 />
+               ) : (
+                 row[key]
+               )}
+             </td>
               ))}
               <td className="text-center px-2">
               <button

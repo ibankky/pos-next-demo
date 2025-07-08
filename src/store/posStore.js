@@ -6,6 +6,10 @@ const usePosStore = create((set, get) => ({
   totalebonus: 0,
   totalecoin: 0,
   memberTelephone: "",
+  member: {
+    phone: '',
+    name: ''
+  },
   cardDataStore: {
     card_no: "",
     card_type: "",
@@ -75,6 +79,18 @@ const usePosStore = create((set, get) => ({
         totalecoin,
       };
     }),
+    updateItemQty: (menuId, qty) =>
+      set((state) => {
+        const updatedItems = state.selectedItems.map((item) =>
+          item.menu_id === menuId ? { ...item, qty } : item
+        );
+        return {
+          selectedItems: updatedItems,
+          totalAmount: updatedItems.reduce((sum, i) => sum + i.price * i.qty, 0),
+          totalecoin: updatedItems.reduce((sum, i) => sum + (i.e_coin || 0) * i.qty, 0),
+          totalebonus: updatedItems.reduce((sum, i) => sum + (i.e_bonus || 0) * i.qty, 0),
+        };
+      }),  
 
   clearItems: () =>
     set({ selectedItems: [], totalAmount: 0, totalebonus: 0, totalecoin: 0 }),
@@ -86,7 +102,15 @@ const usePosStore = create((set, get) => ({
         card_type: "",
       },
     }),
-  setMemberTelePhone: (data) => set({ memberTelephone: data }),
+  setMember: (data) => set({ member: data }),
+  clearMember:  () => {
+    set({
+      member: {
+        phone: '',
+        name: ''
+      },
+    })
+  },
   clearTelePhone: () => {
     set({
       memberTelephone: "",

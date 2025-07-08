@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { LogOut, X } from "lucide-react";
 import { usePosStore } from "@/store";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 export default function MemberSidebar() {
   const totalAmount = usePosStore((state) => state.totalAmount);
@@ -12,25 +14,44 @@ export default function MemberSidebar() {
   const cardDataStore = usePosStore((state) => state.cardDataStore);
   const setCardData = usePosStore((state) => state.setCardData);
   const clearCardDataStore = usePosStore((state) => state.clearCardData);
-  const memberTelephone = usePosStore((state) => state.memberTelephone);
-  const setMemberTelePhone = usePosStore((state) => state.setMemberTelePhone); 
-  const clearTelePhone = usePosStore((state) => state.clearTelePhone);
+  const member = usePosStore((state) => state.member);
+  const setMember = usePosStore((state) => state.setMember);
+  const clearMember = usePosStore((state) => state.clearMember);
   const [phone, setPhone] = useState("");
   const [cardNo, setCardNo] = useState("");
+  const router = useRouter();
 
   const checkCardTelephone = async () => {
     try {
-      const res = await fetch(`/api/card/tel/${memberTelephone}`);
-      if (!res.ok) throw new Error("Failed to fetch card by tel");
+      const res = await fetch(`/api/card/tel/${member.phone}`);
+      console.log(res.status);
+      if (res.status !== 200) {
+        Swal.fire({
+          icon: "warning",
+          title: "ไม่พบหมายเลขสมาชิก",
+          text: "ไม่พบหมายเลขสมาชิก กรุณาลองใหม่อีกครั้ง",
+        });
+        return;
+      }
       const json = await res.json();
-      setMemberTelePhone(memberTelephone)
+      const updatedMember = {
+        phone: json.data.tel,
+        name: `${json.data.m_name} ${json.data.s_name}`,
+      };
+      setMember(updatedMember);
+      Swal.fire({
+        icon: "success",
+        title: "สำเร็จ",
+        text: `คุณ ${updatedMember.name}`,
+      });
+      return;
     } catch (err) {
       console.error("Error loading card by tel:", err);
     }
   };
 
   const checkCardNo = async () => {
-    console.log('check card');
+    console.log("check card");
     console.log(cardDataStore);
     try {
       const res = await fetch(`/api/card/check/${cardDataStore.card_no}`);
@@ -43,7 +64,7 @@ export default function MemberSidebar() {
           card_no: json.data.card_no,
           card_type: json.data.card_type,
           e_coin: json.data.e_coin,
-          e_bonus:json.data.e_bonus
+          e_bonus: json.data.e_bonus,
         });
       }
     } catch (err) {
@@ -53,7 +74,7 @@ export default function MemberSidebar() {
 
   const handleClearTelephone = () => {
     setPhone("");
-    clearTelePhone()
+    clearMember();
   };
 
   return (
@@ -70,12 +91,17 @@ export default function MemberSidebar() {
               placeholder="กรอกเบอร์โทรศัพท์"
               className="text-2xl text-gray-800 text-center py-3 w-full outline-none rounded"
               maxLength={10}
-              value={memberTelephone}
-              onChange={(e) => setMemberTelePhone(e.target.value.replace(/\D/g, ""))}
+              value={member.phone}
+              onChange={(e) =>
+                setMember({
+                  ...member,
+                  phone: e.target.value.replace(/\D/g, ""),
+                })
+              }
             />
           </div>
-          <div className="border border-gray-300 text-xl text-gray-800 text-center py-3">
-            ลูกค้าทั่วไป
+          <div className="border border-gray-300 text-md text-gray-800 text-center py-3">
+            {member.name ? member.name : 'ลูกค้าทั่วไป'}
           </div>
           <Button
             className="w-full bg-[#5834ED] text-white h-10 p-6"
@@ -101,19 +127,19 @@ export default function MemberSidebar() {
             <div className="p-2 border-b">
               <div className="text-sm font-semibold ">Card :</div>
               <div className="text-xl text-purple-600 font-bold text-center">
-              <input
-              type="text"
-              placeholder="Card No"
-              className="text-2xl text-gray-800 text-center py-3 w-full outline-none rounded"
-              maxLength={10}
-              value={cardDataStore?.card_no}
-              onChange={(e) =>
-                setCardData({
-                  ...cardDataStore,
-                  card_no: e.target.value,
-                })
-              }
-            />
+                <input
+                  type="text"
+                  placeholder="Card No"
+                  className="text-2xl text-gray-800 text-center py-3 w-full outline-none rounded"
+                  maxLength={10}
+                  value={cardDataStore?.card_no}
+                  onChange={(e) =>
+                    setCardData({
+                      ...cardDataStore,
+                      card_no: e.target.value,
+                    })
+                  }
+                />
               </div>
             </div>
 
@@ -130,10 +156,10 @@ export default function MemberSidebar() {
               </div>
             </div>
             <Button
-              className="w-full py-2  bg-violet-600 text-white font-bold rounded-md border-2 border-cyan-400 shadow"
+              className="w-full py-2  bg-violet-600 text-white font-bold rounded-md border-2 shadow h-16 text-xl"
               onClick={() => checkCardNo()}
             >
-              Check
+              Check Card
             </Button>
           </div>
         </div>
@@ -171,7 +197,7 @@ export default function MemberSidebar() {
         <div>
           <Button
             className="w-full bg-red-600 text-white h-12"
-            onClick={() => console.log("Logging out...")}
+            onClick={() => router.push("/main")}
           >
             <div className="flex items-center justify-center gap-2 text-2xl">
               <X className="w-20 h-20" />

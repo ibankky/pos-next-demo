@@ -41,7 +41,11 @@ export default function NumericKeypad({ onConfirm }) {
           <button
               key={key}
               onClick={() => {
-                if (key === "Add") return onConfirm(value);
+                if (key === "Add") {
+                  onConfirm(value);     // ทำงานเมื่อกดปุ่ม Add
+                  setValue("0");        // เคลียร์ value หลังจาก confirm
+                  return;
+                }
                 handlePress(key);
               }}
               className={clsx(
