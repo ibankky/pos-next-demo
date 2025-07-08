@@ -30,9 +30,10 @@ export default function TopUpPage() {
     totalAmount,
     clearItems,
     cardDataStore,
-    memberTelephone,
     clearCardData,
     clearTelePhone,
+    member,
+    clearMember
   } = usePosStore();
   const state = usePosStore();
 
@@ -141,7 +142,7 @@ export default function TopUpPage() {
 
   const handlePaymentClick = (method) => {
     
-    if (!memberTelephone) {
+    /* if (!member.phone) {
       Swal.fire({
         icon: "warning",
         title: "กรุณากรอกเบอร์โทร",
@@ -157,7 +158,7 @@ export default function TopUpPage() {
         text: "กรุณาระบุข้อมูลบัตรให้ครบถ้วน",
       });
       return;
-    }
+    } */
 
     if (!selectedItems.length) {
       Swal.fire({
@@ -188,7 +189,7 @@ export default function TopUpPage() {
       free_point: 0,
       from_channel: "POS",
       is_active: true,
-      member_tel: memberTelephone,
+      member_tel: member.phone,
       pos_id: "POS001", // from max addrss search
       pos_menu_id: 101,
       pos_type: "topup",
@@ -227,7 +228,7 @@ export default function TopUpPage() {
       }).then(() => {
         clearItems();
         clearCardData();
-        clearTelePhone();
+        clearMember();
       });
     } catch (err) {
       console.error("Topup error:", err);
@@ -328,12 +329,10 @@ export default function TopUpPage() {
       </div>
       <div className="mt-3 flex">
         <div className="w-1/4 flex gap-4">
-          <Button className="bg-white border-[#F96C20] text-[#F96C20] border h-16 rounded-md px-10 text-2xl">
+          <Button className="bg-white border-[#F96C20] text-[#F96C20] border h-16 rounded-md px-10 text-2xl" onClick={() => console.log('clear data')}>
             Clear
           </Button>
-          <Button className="bg-white border-[#F96C20] text-[#F96C20] border h-16 rounded-md px-10 text-2xl">
-            Delete
-          </Button>
+         
         </div>
         <div className="w-3/4 flex gap-10">
           {payments.map((method) => (

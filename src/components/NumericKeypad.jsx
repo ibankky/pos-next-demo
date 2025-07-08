@@ -30,13 +30,12 @@ export default function NumericKeypad({ onConfirm }) {
           "4",
           "5",
           "6",
-          "+",
+          "Add",
           "7",
           "8",
           "9",
-          "-",
           "0",
-          "Add",
+          
         ].map((key) => (
           <button
               key={key}
@@ -51,8 +50,8 @@ export default function NumericKeypad({ onConfirm }) {
               className={clsx(
                 "py-4 rounded-lg font-bold text-xl flex items-center justify-center",
                 {
-                  "bg-violet-600 text-white col-span-2": key === "Add",
-                  "bg-white text-black col-span-2": key === "0",
+                  "bg-violet-600 text-white row-span-3": key === "Add",
+                  "bg-white text-black col-span-3": key === "0",
                   "bg-white text-black": key !== "Add" && key !== "0",
                 }
               )}

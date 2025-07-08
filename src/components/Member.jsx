@@ -101,7 +101,7 @@ export default function MemberSidebar() {
             />
           </div>
           <div className="border border-gray-300 text-md text-gray-800 text-center py-3">
-            {member.name ? member.name : 'ลูกค้าทั่วไป'}
+            {member.name ? member.name : "ลูกค้าทั่วไป"}
           </div>
           <Button
             className="w-full bg-[#5834ED] text-white h-10 p-6"
@@ -143,18 +143,23 @@ export default function MemberSidebar() {
               </div>
             </div>
 
-            <div className="p-2 border-b">
-              <div className="text-sm font-semibold ">ecoin :</div>
-              <div className="text-xl text-purple-600 font-bold text-center">
-                <span>{cardDataStore?.e_coin ?? 0}</span>
+            <div className="p-2 border-b flex justify-center items-center">
+              <div className="w-1/2">
+                <div className="text-sm font-semibold ">eCoin :</div>
+                <div className="text-xl text-purple-600 font-bold text-center">
+                  <span>{cardDataStore?.e_coin ?? 0}</span>
+                </div>
+              </div>
+              <div className="w-1/2">
+                <div className="p-2 border-b">
+                  <div className="text-sm font-semibold">eBonus :</div>
+                  <div className="text-xl text-purple-600 font-bold text-center">
+                    <span>{cardDataStore?.e_bonus ?? 0}</span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="p-2 border-b">
-              <div className="text-sm font-semibold">ebonus :</div>
-              <div className="text-xl text-purple-600 font-bold text-center">
-                <span>{cardDataStore?.e_bonus ?? 0}</span>
-              </div>
-            </div>
+
             <Button
               className="w-full py-2  bg-violet-600 text-white font-bold rounded-md border-2 shadow h-16 text-xl"
               onClick={() => checkCardNo()}
@@ -172,20 +177,21 @@ export default function MemberSidebar() {
               </div>
             </div>
 
-            <div className="p-2 border">
+            <div className="p-2 border flex justify-center items-center">
+              <div className="w-1/2">
               <div className="text-sm font-semibold">ecoin :</div>
               <div className="flex justify-center gap-6 mt-1 text-purple-600 font-bold text-xl">
                 <span>
                   {totalecoin ? Number(totalecoin).toLocaleString() : "0"}
                 </span>
               </div>
-            </div>
-
-            <div className="p-2 border">
+              </div>
+              <div className="w-1/2">
               <div className="text-sm font-semibold">ebonus :</div>
               <div className="text-purple-600 font-bold text-xl">
                 {totalebonus ? Number(totalebonus).toLocaleString() : "0"}
-              </div>
+              </div></div>
+              
             </div>
 
             <div className="p-2 border">

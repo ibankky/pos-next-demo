@@ -47,12 +47,13 @@ export default function PaymentPopup({ open, onClose, onConfirm }) {
   };
 
   const spanTwoCols = ["1,000", "500", "100", "10"];
+  const spanTwoRows = ["←" , "C"]
 
   const buttons = [
     ["1", "2", "3", "1,000", "←"],
-    ["4", "5", "6", "500", "C"],
-    ["7", "8", "9", "100", "+"],
-    ["0", "10", "-"],
+    ["4", "5", "6", "500",],
+    ["7", "8", "9", "100", "C"],
+    ["0", "10", ],
   ];
 
   return (
@@ -103,7 +104,8 @@ export default function PaymentPopup({ open, onClose, onConfirm }) {
                     ? "col-span-3"
                     : spanTwoCols.includes(label)
                     ? "col-span-2"
-                    : ""
+                    : "",
+                  spanTwoRows.includes(label) ? "row-span-2" : ""  
                 )}
               >
                 {{

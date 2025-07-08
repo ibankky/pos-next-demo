@@ -50,7 +50,7 @@ export default function NumericPopup() {
 
         {/* Keypad */}
         <div className="grid grid-cols-4 gap-2">
-          {["1","2","3","←","4","5","6","+","7","8","9","-","0",".","C"].map((key) => (
+          {["1","2","3","←","4","5","6","","7","8","9","","0",".","C"].map((key) => (
             <button
               key={key}
               onClick={() => handleKeyPress(key)}
