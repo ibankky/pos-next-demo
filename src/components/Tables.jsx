@@ -13,8 +13,6 @@ export default function Tables({ rows = [] , }) {
   
   if (!rows.length) return <div className="text-center py-4 text-gray-500">No data</div>;
 
-  console.log('row 0');
-  console.log(rows[0]);
   const headers = Object.keys(rows[0]).filter((key) => key !== "menu_id");
   
   const columnNames = {
@@ -36,8 +34,8 @@ export default function Tables({ rows = [] , }) {
 
   return (
     <div className="overflow-auto border rounded-lg shadow">
-      <table className="min-w-full table-auto text-sm text-left text-gray-700">
-        <thead className="bg-gray-200 text-gray-800 text-sm font-semibold">
+      <table className="min-w-full table-auto text-md text-left text-gray-700">
+        <thead className="bg-gray-200 text-gray-800 text-md font-semibold">
           <tr>
             {headers.map((key) => (
               <th key={key} className={`px-4 py-2 ${typeof rows[0][key] === 'number' ? 'text-right' : ''}`}>

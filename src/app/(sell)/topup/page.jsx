@@ -23,19 +23,22 @@ export default function TopUpPage() {
   const [selectedItem, setSelectedItem] = useState([]);
   const [topupMenu, setTopupMenu] = useState({});
   const [payments, setPayments] = useState([]);
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSelectBank , setIsSelectBank] = useState(false);
   const {
+    // 🔧 Actions
     addItem,
-    selectedItems,
-    totalAmount,
     clearItems,
-    cardDataStore,
     clearCardData,
-    clearTelePhone,
+    clearMember,
+    removeItemByMenuId,
+  
+    // 🧱 States
+    selectedItems,
+    cardDataStore,
     member,
-    clearMember
   } = usePosStore();
-  const state = usePosStore();
+  
 
   useEffect(() => {
     const fetchGroupMenu = async () => {
@@ -104,13 +107,21 @@ export default function TopUpPage() {
       const res = await fetch(`/api/master/payment`);
       if (!res.ok) throw new Error("Failed to fetch master payment");
       const json = await res.json();
-      const paymentData = json.data.map((item) => ({
-        ...item,
-        ...(paymentMetaMap[item.name] || {
-          color: "#ccc", // fallback
-          icon: "/icon/pos.svg",
-        }),
-      }));
+      const paymentData = [
+        {
+          id: "exact",
+          name: "จ่ายเงินพอดี",
+          color: "#D9F99D",
+          icon: "/icon/exact.svg",
+        },
+        ...json.data.map((item) => ({
+          ...item,
+          ...(paymentMetaMap[item.name] || {
+            color: "#ccc",
+            icon: "/icon/pos.svg",
+          }),
+        })),
+      ];
       setPayments(paymentData);
     } catch (err) {
       console.error("Error loading master payment:", err);
@@ -118,14 +129,31 @@ export default function TopUpPage() {
   };
 
   const handleConfirm = (val) => {
-    const topupNew = {
-      ...topupMenu, // copy properties จาก topupMenu
-      price: Number(val),
-      group_menu_name: "เติมเงิน",
-      menu_id: topupMenu.id,
-      menu_name: topupMenu.description,
-    };
-    addItem(topupNew);
+    const price = Number(val);
+    const existingItem = selectedItems.find(item => item.menu_id === topupMenu.id);
+    if (existingItem) {
+      // มีอยู่แล้ว → รวมยอด
+      const updatedItem = {
+        ...existingItem,
+        price: existingItem.price + price,
+        qty: existingItem.qty + 1,
+      };
+  
+      // เอาออกก่อนแล้วค่อยเพิ่มใหม่
+      removeItemByMenuId(existingItem.menu_id);
+      addItem(updatedItem);
+    } else {
+      // ยังไม่มี → เพิ่มใหม่
+      const topupNew = {
+        ...topupMenu,
+        price: price,
+        qty: 1,
+        group_menu_name: "เติมเงิน",
+        menu_id: topupMenu.id,
+        menu_name: topupMenu.description,
+      };
+      addItem(topupNew);
+    }
   };
 
   const handleConfirmCash = () => {
@@ -172,6 +200,8 @@ export default function TopUpPage() {
     
     if (method.name === 'Cash') {
       setIsOpen(true)
+    } else if(method.name === 'Transfer'){
+      console.log('case tranfer');  
     } else {
       topUpTocard(method);
       // default action
@@ -180,7 +210,7 @@ export default function TopUpPage() {
 
   const topUpTocard = async (method) => {
     const payload = {
-      bank_detail: method.name,
+      bank_detail: '', // case โอนเงิน ใส่ ชื่อธนาคารไป KBANK,SCB,BAY
       bill_location: "CCB", //Location get from user login
       bill_payment_id: method.id,
       cachier: "admin", //name from user login
@@ -247,7 +277,7 @@ export default function TopUpPage() {
       cell: (info) => info.getValue(),
     },
     {
-      header: "ecoin",
+      header: "eCoin",
       accessorKey: "e_coin",
       cell: (info) => info.getValue(),
     },
@@ -329,7 +359,7 @@ export default function TopUpPage() {
       </div>
       <div className="mt-3 flex">
         <div className="w-1/4 flex gap-4">
-          <Button className="bg-white border-[#F96C20] text-[#F96C20] border h-16 rounded-md px-10 text-2xl" onClick={() => console.log('clear data')}>
+          <Button className="bg-white border-[#F96C20] text-[#F96C20] border h-16 rounded-md px-10 text-2xl" onClick={() => clearItems()}>
             Clear
           </Button>
          
