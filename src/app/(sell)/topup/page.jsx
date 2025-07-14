@@ -318,7 +318,7 @@ export default function TopUpPage() {
           <NumericKeypad onConfirm={handleConfirm} />
         </div>
         <div className="w-3/4">
-          <div className="flex gap-4">
+          <div className="flex gap-4 overflow-y-scroll">
             {groupMenus.map((menu) => (
               <Button
                 key={menu.id}
