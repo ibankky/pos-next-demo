@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import DataTable from "@/components/DataTable";
 import Tables from "@/components/TablesVoid";
+import { Checkbox } from "@/components/ui/checkbox";
 import dayjs from "dayjs";
+import Swal from "sweetalert2";
 import {
   Select,
   SelectContent,
@@ -12,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { usePosStore } from "@/store";
 
 export default function VoidPage() {
   const [loading, setLoading] = useState(true);
@@ -24,14 +27,18 @@ export default function VoidPage() {
   const [pageCount, setPageCount] = useState(1);
   const [formData, setFormData] = useState({
     startDate: dayjs().format("YYYY-MM-DD"),
-    endDate: "",
+    endDate: dayjs().format("YYYY-MM-DD"),
     phone: "",
     billNo: "",
   });
   const [reason, setReason] = useState("ลูกค้าขอเปลี่ยนโปรฯ");
   const [customReason, setCustomReason] = useState("");
-  const [isOther , setIsOther] = useState(false);
-
+  const [isOther, setIsOther] = useState(false);
+  const [cutInCard, setCutInCard] = useState(true);
+  const [cardData , setCardData] = useState("")
+  const [coin , setCoin] = useState(0)
+  const [bonus , setBonus] = useState(0)
+  const member = usePosStore((state) => state.member);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,14 +69,26 @@ export default function VoidPage() {
 
   const fetchPosTransaction = async () => {
     const { startDate, endDate, phone, billNo } = formData;
+   
     const query = new URLSearchParams({
       startDate: startDate,
       endDate: endDate,
-      memberTel : phone,
+      memberTel: phone,
       billNo,
     }).toString();
+
+    if (cutInCard && cardData) {
+      // สมมติว่า cardData มีโครงสร้างเป็น object เช่น { card_no: 'ABC123' }
+      Object.entries(cardData).forEach(([key, value]) => {
+        if (value !== undefined && value !== "") {
+          queryParams.append(key, value);
+        }
+      });
+    }
+    //console.log('query');
+    //console.log(query);
     try {
-      const res = await fetch(`/api/pos/transaction?${query}`);
+      const res = await fetch(`/api/pos/transaction?${queryParams.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch branches");
       const json = await res.json();
       setTransaction(json.data.data.result);
@@ -80,12 +99,12 @@ export default function VoidPage() {
   };
 
   const fetchPosSubTransaction = async (bill) => {
-    const billNo = bill
+    const billNo = bill;
     try {
       const res = await fetch(`/api/pos/pos-sub?billNo=${billNo}`);
       if (!res.ok) throw new Error("Failed to fetch branches");
       const json = await res.json();
-      return json.data.data[0]
+      return json.data.data[0];
       //setMenuData(json.data.result);
     } catch (err) {
       console.error("Error loading menuDataList:", err);
@@ -96,12 +115,43 @@ export default function VoidPage() {
     const subTransaction = await fetchPosSubTransaction(item.bill_no);
     const newItem = {
       ...item,
-      name: subTransaction.menu_name, 
+      name: subTransaction.menu_name,
     };
-    setSelectedItem((prev) => {
-      const exists = prev.some((i) => i.bill_no === item.bill_no);
-      return exists ? prev : [...prev, newItem];
-    });
+    setSelectedItem([newItem]);
+  };
+
+  const voidTransaction = () => {
+    const payload = {
+      bill_no: billNo,
+      card_no: cardNo,
+      void_reason: voidReason,
+      void_user: voidUser,
+    }
+  }
+
+  const checkCard = async () => {
+    if(cutInCard){
+      if(!cardData){
+        Swal.fire({
+          icon: "warning",
+          title: "กรุณาแสกนบัตร",
+          text: "กรุณาแสกนบัตรก่อนดำเนินการ",
+        });
+        return;
+      }
+    }
+    try {
+      const res = await fetch(`/api/card/check/${cardData}`);
+      if (!res.ok) throw new Error("ไม่สามารถดึงข้อมูลบัตรได้");
+      const json = await res.json();
+      setCoin(json.data.e_coin);
+      setBonus(json.data.e_bonus);
+      
+     
+    } catch (err) {
+      console.error("Error checking card:", err);
+      alert("เกิดข้อผิดพลาดในการดึงข้อมูลบัตร");
+    }
   };
 
   const columns = [
@@ -205,7 +255,8 @@ export default function VoidPage() {
                 name="endDate"
                 value={formData.endDate}
                 onChange={handleChange}
-                className="border border-purple-500 rounded-md px-3 py-2 outline-none focus:ring-2 focus:ring-purple-400"
+                disabled
+               className="border border-purple-500 rounded-md px-3 py-2 outline-none focus:ring-2 focus:ring-purple-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-70"
               />
             </div>
           </div>
@@ -234,29 +285,49 @@ export default function VoidPage() {
         </div>
         <div className="w-3/5 flex gap-4">
           <div className="w-1/2 flex flex-col">
-            <div className="bg-orange-400 rounded-tl-md rounded-tr-md">
-              <div className="text-white p-4 text-center text-2xl">
-                คัดยอดใน Card
-              </div>
+            <div className="bg-orange-400 rounded-tl-md rounded-tr-md flex items-center justify-center gap-2 px-4 py-4">
+              <Checkbox
+                id="cut-in-card"
+                checked={cutInCard}
+                onCheckedChange={(checked) => setCutInCard(!!checked)}
+              />
+              <label
+                htmlFor="cut-in-card"
+                className="text-white text-xl font-bold leading-none"
+              >
+                ตัดยอดใน Card
+              </label>
             </div>
             <div className="flex flex-col bg-white px-4 py-4">
               <div>หมายเลขบัตร</div>
-              <div className="text-3xl text-purple-600 text-center">AAAAAA</div>
+              <input
+                  type="text"
+                  placeholder="Card No"
+                  className="text-3xl text-purple-600 text-center py-3 w-full outline-none rounded"
+                  maxLength={10}
+                  onChange={(e) =>
+                    setCardData(e.target.value)
+                  }
+                  value={cardData}
+                 
+                  
+                />
             </div>
-            <div className="flex bg-white px-4 py-4">
+            <div className="flex bg-white px-4 pt-2 pb-4">
               <div className="w-1/2">
                 <div>eCoin</div>
-                <div className="text-3xl text-purple-600 text-center">200</div>
+                <div className="text-3xl text-purple-600 text-center">{coin}</div>
               </div>
               <div className="w-1/2">
                 <div>eBonus</div>
-                <div className="text-3xl text-purple-600 text-center">200</div>
+                <div className="text-3xl text-purple-600 text-center">{bonus}</div>
               </div>
             </div>
             <div className="flex bg-white">
               <button
                 type="button"
                 className="w-full border  border-[#5834ED] bg-[#5834ED] text-white rounded py-2 text-center text-2xl"
+                onClick={checkCard}
               >
                 Check Card
               </button>

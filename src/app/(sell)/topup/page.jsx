@@ -136,6 +136,7 @@ export default function TopUpPage() {
       const updatedItem = {
         ...existingItem,
         price: existingItem.price + price,
+        e_coin : existingItem.price + price,
         qty: existingItem.qty + 1,
       };
   
@@ -151,6 +152,7 @@ export default function TopUpPage() {
         group_menu_name: "เติมเงิน",
         menu_id: topupMenu.id,
         menu_name: topupMenu.description,
+        e_coin : price,
       };
       addItem(topupNew);
     }
@@ -169,15 +171,15 @@ export default function TopUpPage() {
   };
 
   const handlePaymentClick = (method) => {
-    
-    if (!member.phone) {
+    let card = ''
+    /* if (!member.phone) {
       Swal.fire({
         icon: "warning",
         title: "กรุณากรอกเบอร์โทร",
         text: "ต้องกรอกเบอร์สมาชิกก่อนดำเนินการ",
       });
       return;
-    }
+    } */
 
     if(cardDataStore.e_coin > 0){
       // ดัก case ที่ มี ecoin ต้องใช้บัตร
@@ -188,8 +190,15 @@ export default function TopUpPage() {
           text: "กรุณาระบุข้อมูลบัตรให้ครบถ้วน",
         });
         return;
-      } 
+      }else{
+        card = cardDataStore?.card_no
+      }
+
+    }else{
+      card = "Card ID"
     }
+    console.log('xxxx')
+    console.log(card);
    
 
     if (!selectedItems.length) {
@@ -207,23 +216,25 @@ export default function TopUpPage() {
     } else if(method.name === 'Transfer'){
       console.log('case tranfer');  
     } else {
-      topUpTocard(method);
+      topUpTocard(method , card);
       // default action
     }
   };
+  
+ 
 
-  const topUpTocard = async (method) => {
+  const topUpTocard = async (method , card) => {
     const payload = {
       bank_detail: '', // case โอนเงิน ใส่ ชื่อธนาคารไป KBANK,SCB,BAY
       bill_location: "CCB", //Location get from user login
       bill_payment_id: method.id,
       cachier: "admin", //name from user login
-      card_no: cardDataStore?.card_no,
+      card_no: card,
       card_type_id: "d96dca64-e075-416f-a8df-c9423093087c", // find from card type
       free_point: 0,
       from_channel: "POS",
       is_active: true,
-      member_tel: member.phone,
+      member_tel: member?.phone ? member?.phone : '0958436474',
       pos_id: "POS001", // from max addrss search
       pos_menu_id: 101,
       pos_type: "topup",
@@ -293,9 +304,7 @@ export default function TopUpPage() {
   ];
 
   const rows = selectedItems.map((item, index) => ({
-    name: `รายการที่ ${index + 1} ${
-      "[ " + item.group_menu_name + " ]" ?? "-"
-    } ${item.menu_name ?? item.code}`,
+    name: item.menu_name ,
     qty: item.qty ?? 1,
     price: item.price ?? 0,
     ecoin: item.e_coin ?? 0,

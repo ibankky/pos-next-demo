@@ -7,8 +7,8 @@ const usePosStore = create((set, get) => ({
   totalecoin: 0,
   memberTelephone: "",
   member: {
-    phone: '',
-    name: ''
+    phone: "",
+    name: "",
   },
   cardDataStore: {
     card_no: "",
@@ -79,18 +79,24 @@ const usePosStore = create((set, get) => ({
         totalecoin,
       };
     }),
-    updateItemQty: (menuId, qty) =>
-      set((state) => {
-        const updatedItems = state.selectedItems.map((item) =>
-          item.menu_id === menuId ? { ...item, qty } : item
-        );
-        return {
-          selectedItems: updatedItems,
-          totalAmount: updatedItems.reduce((sum, i) => sum + i.price * i.qty, 0),
-          totalecoin: updatedItems.reduce((sum, i) => sum + (i.e_coin || 0) * i.qty, 0),
-          totalebonus: updatedItems.reduce((sum, i) => sum + (i.e_bonus || 0) * i.qty, 0),
-        };
-      }),  
+  updateItemQty: (menuId, qty) =>
+    set((state) => {
+      const updatedItems = state.selectedItems.map((item) =>
+        item.menu_id === menuId ? { ...item, qty } : item
+      );
+      return {
+        selectedItems: updatedItems,
+        totalAmount: updatedItems.reduce((sum, i) => sum + i.price * i.qty, 0),
+        totalecoin: updatedItems.reduce(
+          (sum, i) => sum + (i.e_coin || 0) * i.qty,
+          0
+        ),
+        totalebonus: updatedItems.reduce(
+          (sum, i) => sum + (i.e_bonus || 0) * i.qty,
+          0
+        ),
+      };
+    }),
 
   clearItems: () =>
     set({ selectedItems: [], totalAmount: 0, totalebonus: 0, totalecoin: 0 }),
@@ -103,13 +109,13 @@ const usePosStore = create((set, get) => ({
       },
     }),
   setMember: (data) => set({ member: data }),
-  clearMember:  () => {
+  clearMember: () => {
     set({
       member: {
-        phone: '',
-        name: ''
+        phone: "",
+        name: "",
       },
-    })
+    });
   },
   clearTelePhone: () => {
     set({
@@ -117,11 +123,31 @@ const usePosStore = create((set, get) => ({
     });
   },
   removeItemByMenuId: (menuId) =>
-    set((state) => ({
-      selectedItems: state.selectedItems.filter(
+    set((state) => {
+      const updatedItems = state.selectedItems.filter(
         (item) => item.menu_id !== menuId
-      ),
-    })),
+      );
+  
+      const totalAmount = updatedItems.reduce(
+        (sum, item) => sum + (item.totalprice ?? 0),
+        0
+      );
+      const totalecoin = updatedItems.reduce(
+        (sum, item) => sum + (item.totalecoin ?? 0),
+        0
+      );
+      const totalebonus = updatedItems.reduce(
+        (sum, item) => sum + (item.totalebonus ?? 0),
+        0
+      );
+  
+      return {
+        selectedItems: updatedItems,
+        totalAmount,
+        totalecoin,
+        totalebonus,
+      };
+    }),
 }));
 
 export default usePosStore;

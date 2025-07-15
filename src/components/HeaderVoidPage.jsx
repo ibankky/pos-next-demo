@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store'; 
 import { Button } from '@/components/ui/button';
 import { User } from "lucide-react";
+import { usePosStore } from "@/store";
 
 export default function HeaderSellpage() {
   const user = useAuthStore((state) => state.user);
@@ -14,7 +15,7 @@ export default function HeaderSellpage() {
     logout(); // ล้าง Zustand state
     router.push('/login'); // redirect
   };
-
+  const member = usePosStore((state) => state.member);
   return (
     <header className="flex justify-between items-center border-b-white border">
       <div className="w-1/4 flex items-center bg-gray-100 p-4 h-full">
@@ -34,7 +35,7 @@ export default function HeaderSellpage() {
         <div className="flex">
             <div className="w-4/5">
                 <div className="flex flex-col gap-2">
-                    <div className="text-3xl">0914182425</div>
+                    <div className="text-3xl">{member.phone ? member.phone : '0914182425'  }</div>
                     <div className="text-3xl">ทำรายการยกเลิกบิล</div>
                 </div>
             </div>

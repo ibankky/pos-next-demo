@@ -19,12 +19,12 @@ export default function MemberSidebar() {
   const clearMember = usePosStore((state) => state.clearMember);
   const [phone, setPhone] = useState("");
   const [cardNo, setCardNo] = useState("");
+  const [freePoint , setFreePoint] = useState("");
   const router = useRouter();
 
   const checkCardTelephone = async () => {
     try {
       const res = await fetch(`/api/card/tel/${member.phone}`);
-      console.log(res.status);
       if (res.status !== 200) {
         Swal.fire({
           icon: "warning",
@@ -51,8 +51,6 @@ export default function MemberSidebar() {
   };
 
   const checkCardNo = async () => {
-    console.log("check card");
-    console.log(cardDataStore);
     try {
       const res = await fetch(`/api/card/check/${cardDataStore.card_no}`);
       if (!res.ok) throw new Error("Failed to fetch card by Id");
@@ -92,12 +90,13 @@ export default function MemberSidebar() {
               className="text-2xl text-gray-800 text-center py-3 w-full outline-none rounded"
               maxLength={10}
               value={member.phone}
-              onChange={(e) =>
+              disabled
+              /* onChange={(e) =>
                 setMember({
                   ...member,
                   phone: e.target.value.replace(/\D/g, ""),
                 })
-              }
+              } */
             />
           </div>
           <div className="border border-gray-300 text-md text-gray-800 text-center py-3">
@@ -105,7 +104,7 @@ export default function MemberSidebar() {
           </div>
           <Button
             className="w-full bg-[#5834ED] text-white h-10 p-6"
-            onClick={() => checkCardTelephone()}
+           
           >
             <div className="flex items-center justify-center  text-2xl">
               ค้นหาสมากชิก
