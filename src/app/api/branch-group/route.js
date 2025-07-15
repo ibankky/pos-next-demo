@@ -4,7 +4,7 @@ export async function GET() {
         method: "GET",
         headers: {
           Accept: "application/json",
-          Authorization: "Basic YWRtaW46MTIzNA==", // 👈 Basic Auth encoded (admin:1234)
+          Authorization: "Basic YWRtaW46NDMyMQ==", // 👈 Basic Auth encoded (admin:1234)
         },
       });
   

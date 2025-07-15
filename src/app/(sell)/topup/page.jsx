@@ -170,7 +170,7 @@ export default function TopUpPage() {
 
   const handlePaymentClick = (method) => {
     
-    /* if (!member.phone) {
+    if (!member.phone) {
       Swal.fire({
         icon: "warning",
         title: "กรุณากรอกเบอร์โทร",
@@ -179,14 +179,18 @@ export default function TopUpPage() {
       return;
     }
 
-    if (!cardDataStore?.card_no || !cardDataStore?.card_type) {
-      Swal.fire({
-        icon: "warning",
-        title: "ข้อมูลบัตรไม่ครบ",
-        text: "กรุณาระบุข้อมูลบัตรให้ครบถ้วน",
-      });
-      return;
-    } */
+    if(cardDataStore.e_coin > 0){
+      // ดัก case ที่ มี ecoin ต้องใช้บัตร
+      if (!cardDataStore?.card_no || !cardDataStore?.card_type) {
+        Swal.fire({
+          icon: "warning",
+          title: "ข้อมูลบัตรไม่ครบ",
+          text: "กรุณาระบุข้อมูลบัตรให้ครบถ้วน",
+        });
+        return;
+      } 
+    }
+   
 
     if (!selectedItems.length) {
       Swal.fire({
@@ -333,7 +337,7 @@ export default function TopUpPage() {
               }
             `}
               >
-                {menu.name}
+                {menu.display_name}
               </Button>
             ))}
           </div>

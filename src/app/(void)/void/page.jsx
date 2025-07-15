@@ -5,6 +5,13 @@ import { useEffect, useState } from "react";
 import DataTable from "@/components/DataTable";
 import Tables from "@/components/TablesVoid";
 import dayjs from "dayjs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function VoidPage() {
   const [loading, setLoading] = useState(true);
@@ -15,18 +22,56 @@ export default function VoidPage() {
     pageSize: 10,
   });
   const [pageCount, setPageCount] = useState(1);
+  const [formData, setFormData] = useState({
+    startDate: dayjs().format("YYYY-MM-DD"),
+    endDate: "",
+    phone: "",
+    billNo: "",
+  });
+  const [reason, setReason] = useState("ลูกค้าขอเปลี่ยนโปรฯ");
+  const [customReason, setCustomReason] = useState("");
+  const [isOther , setIsOther] = useState(false);
+
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleVoid = () => {
+    const finalReason = isOther ? customReason : reason;
+    if (!finalReason.trim()) {
+      alert("กรุณาระบุเหตุผลให้ครบถ้วน");
+      return;
+    }
+
+    console.log("Void with reason:", finalReason);
+    // ทำการส่งข้อมูลไป backend ตรงนี้
+  };
 
   useEffect(() => {
-    fetchPosTransaction();
-  }, []);
+    const { startDate, endDate, phone, billNo } = formData;
+    const hasValidDates = startDate && endDate;
+    const hasValidSearch =
+      (phone && phone.length > 3) || (billNo && billNo.length > 3);
+
+    if (hasValidDates && hasValidSearch) {
+      fetchPosTransaction();
+    }
+  }, [formData]);
 
   const fetchPosTransaction = async () => {
+    const { startDate, endDate, phone, billNo } = formData;
+    const query = new URLSearchParams({
+      startDate: startDate,
+      endDate: endDate,
+      memberTel : phone,
+      billNo,
+    }).toString();
     try {
-      const res = await fetch(`/api/pos/transaction`);
+      const res = await fetch(`/api/pos/transaction?${query}`);
       if (!res.ok) throw new Error("Failed to fetch branches");
       const json = await res.json();
-      console.log("transtaction");
-      console.log(json.data.data.result);
       setTransaction(json.data.data.result);
       //setMenuData(json.data.result);
     } catch (err) {
@@ -34,11 +79,28 @@ export default function VoidPage() {
     }
   };
 
-  const handleSelectedItem = (item) => {
-    console.log(item)
+  const fetchPosSubTransaction = async (bill) => {
+    const billNo = bill
+    try {
+      const res = await fetch(`/api/pos/pos-sub?billNo=${billNo}`);
+      if (!res.ok) throw new Error("Failed to fetch branches");
+      const json = await res.json();
+      return json.data.data[0]
+      //setMenuData(json.data.result);
+    } catch (err) {
+      console.error("Error loading menuDataList:", err);
+    }
+  };
+
+  const handleSelectedItem = async (item) => {
+    const subTransaction = await fetchPosSubTransaction(item.bill_no);
+    const newItem = {
+      ...item,
+      name: subTransaction.menu_name, 
+    };
     setSelectedItem((prev) => {
       const exists = prev.some((i) => i.bill_no === item.bill_no);
-      return exists ? prev : [...prev, item];
+      return exists ? prev : [...prev, newItem];
     });
   };
 
@@ -107,13 +169,18 @@ export default function VoidPage() {
     /* name: `รายการที่ ${index + 1} ${
       "[ " + item.group_menu_name + " ]" ?? "-"
     } ${item.menu_name ?? item.code}`, */
-    name : `name ${index + 1}`,
+    name: item.name,
     qty: item.qty ?? 1,
     price: item.price ?? 0,
     ecoin: item.e_coin ?? 0,
     ebonus: item.e_bonus ?? 0,
-    
   }));
+
+  const cancelReasons = [
+    { label: "ลูกค้าขอเปลี่ยนโปรฯ", value: "ลูกค้าขอเปลี่ยนโปรฯ" },
+    { label: "พนักงานกดผิด", value: "พนักงานกดผิด" },
+    { label: "อื่นๆ", value: "อื่นๆ" },
+  ];
   return (
     <div>
       <div className="p-6 flex gap-4">
@@ -124,13 +191,20 @@ export default function VoidPage() {
               <label className="text-sm font-medium mb-1">ตั้งแต่ :</label>
               <input
                 type="date"
-                className="border border-purple-500 rounded-md px-3 py-2 outline-none focus:ring-2 focus:ring-purple-400"
+                name="startDate"
+                value={formData.startDate}
+                onChange={handleChange}
+                disabled
+                className="border border-purple-500 rounded-md px-3 py-2 outline-none focus:ring-2 focus:ring-purple-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-70"
               />
             </div>
             <div className="flex flex-col w-1/2">
               <label className="text-sm font-medium mb-1">ถึง :</label>
               <input
                 type="date"
+                name="endDate"
+                value={formData.endDate}
+                onChange={handleChange}
                 className="border border-purple-500 rounded-md px-3 py-2 outline-none focus:ring-2 focus:ring-purple-400"
               />
             </div>
@@ -139,7 +213,10 @@ export default function VoidPage() {
             <label className="text-sm font-medium mb-1">ค้นหาเบอร์โทร :</label>
             <input
               type="text"
+              name="phone"
+              value={formData.phone}
               placeholder="ระบุเบอร์โทร"
+              onChange={handleChange}
               className="rounded-md px-3 py-2 border border-gray-300 text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-400"
             />
           </div>
@@ -147,7 +224,10 @@ export default function VoidPage() {
             <label className="text-sm font-medium mb-1">ค้นหาเลขที่บิล :</label>
             <input
               type="text"
+              name="billNo"
+              value={formData.billNo}
               placeholder="ระบุเลขที่บิล"
+              onChange={handleChange}
               className="rounded-md px-3 py-2 border border-gray-300 text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-400"
             />
           </div>
@@ -182,7 +262,63 @@ export default function VoidPage() {
               </button>
             </div>
           </div>
-          <div className="w-1/2 bg-white">เหตุผล</div>
+          <div className="bg-white w-1/2 p-6 rounded-lg shadow-md">
+            <label className="text-red-600 font-semibold text-sm">
+              *เหตุผลในการยกเลิก
+            </label>
+
+            <Select
+              value={reason}
+              onValueChange={(val) => {
+                setReason(val);
+                setIsOther(val === "อื่นๆ");
+              }}
+            >
+              <SelectTrigger
+                className="w-full mt-3 border-2 rounded-md px-3 py-2 min-h-[44px] text-black text-md
+               placeholder-gray-400 border-purple-500 focus:ring-2 focus:ring-purple-400"
+              >
+                <SelectValue placeholder="เลือกเหตุผล" />
+              </SelectTrigger>
+              <SelectContent>
+                {cancelReasons.map((reason) => (
+                  <SelectItem key={reason.value} value={reason.value}>
+                    {reason.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <input
+              type="text"
+              placeholder="อื่นๆ (โปรดระบุเหตุผล)"
+              disabled={!isOther}
+              value={customReason}
+              onChange={(e) => setCustomReason(e.target.value)}
+              className={`w-full mt-3 border-2 rounded-md px-3 py-2 text-black 
+          placeholder-gray-400 
+          ${
+            isOther
+              ? "border-purple-500 focus:ring-2 focus:ring-purple-400"
+              : "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
+          }`}
+            />
+
+            <div className="mt-4 flex gap-3">
+              <button
+                onClick={handleVoid}
+                className="flex-1 bg-[#5834ED] text-white font-bold py-2 rounded"
+              >
+                Void
+              </button>
+              <button
+                disabled
+                className="flex-1 bg-gray-300 text-white font-bold py-2 rounded cursor-not-allowed"
+              >
+                Re-print
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       <div className="mt-2 bg-white min-h-80 overflow-auto max-h-80">
@@ -194,17 +330,17 @@ export default function VoidPage() {
             setPagination={setPagination}
             pageCount={pageCount}
             isPagination={false}
-             onRowClick={(rowData) => {
-                      handleSelectedItem(rowData);
-                    }}
+            onRowClick={(rowData) => {
+              handleSelectedItem(rowData);
+            }}
           />
         </div>
       </div>
       <div className="flex mt-2">
         <div className="w-3/4">
           <p className="text-red-500 mb-1.5">รายละเอียดรายการ *</p>
-          <div className="w-full h-10 bg-white">
-           <Tables rows={rows} />
+          <div className="w-full h-10 bg-white min-h-32 mb-4">
+            <Tables rows={rows} />
           </div>
         </div>
       </div>

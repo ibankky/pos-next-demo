@@ -6,7 +6,7 @@ export async function POST(req) {
         method: 'POST',
         headers: {
           Accept: 'application/json',
-          Authorization: 'Basic YWRtaW46MTIzNA==',
+          Authorization: 'Basic YWRtaW46NDMyMQ==',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),

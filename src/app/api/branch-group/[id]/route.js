@@ -5,7 +5,7 @@ export async function GET(req, { params }) {
         method: "GET",
         headers: {
           Accept: "application/json",
-          Authorization: "Basic YWRtaW46MTIzNA==",
+          Authorization: "Basic YWRtaW46NDMyMQ==",
         },
       });
   
@@ -29,7 +29,7 @@ export async function GET(req, { params }) {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          Authorization: "Basic YWRtaW46MTIzNA==",
+          Authorization: "Basic YWRtaW46NDMyMQ==",
         },
         body: JSON.stringify(body),
       });

@@ -4,7 +4,7 @@ export async function GET() {
       method: "GET",
       headers: {
         Accept: "application/json",
-        Authorization: "Basic YWRtaW46MTIzNA==",
+        Authorization: "Basic YWRtaW46NDMyMQ==",
       },
     });
   

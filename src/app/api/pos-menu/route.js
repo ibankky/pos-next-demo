@@ -5,7 +5,7 @@ export async function POST(req) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Basic YWRtaW46MTIzNA==", // ✅ ใส่ auth ได้ปลอดภัย
+        Authorization: "Basic YWRtaW46NDMyMQ==", // ✅ ใส่ auth ได้ปลอดภัย
       },
       body: JSON.stringify(data),
     });

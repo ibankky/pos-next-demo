@@ -1,10 +1,20 @@
-export async function GET() {
+export async function GET(req) {
+    const { searchParams } = new URL(req.url);
+    //const startDate = searchParams.get("startDate");
+    //const endDate = searchParams.get("endDate");
+    const startDate = "2025-07-09"
+    const endDate = "2025-07-09"
+    const memberTel = searchParams.get("memberTel");
+    const billNo = searchParams.get("billNo");
+
+    
     try {
-      const res = await fetch("http://139.59.223.142/api/pos-transaction/list", {
+    const apiUrl = `http://139.59.223.142/api/pos-transaction/list?startDate=${startDate}&endDate=${endDate}&memberTel=${memberTel}&billNo=${billNo}`;  
+      const res = await fetch(apiUrl, {
         method: "GET",
         headers: {
           Accept: "application/json",
-          Authorization: "Basic YWRtaW46MTIzNA==", // admin:1234
+          Authorization: "Basic YWRtaW46NDMyMQ==", // admin:1234
         },
       });
   
@@ -32,7 +42,7 @@ export async function GET() {
         method: "POST",
         headers: {
           Accept: "application/json",
-          Authorization: "Basic YWRtaW46MTIzNA==",
+          Authorization: "Basic YWRtaW46NDMyMQ==",
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
