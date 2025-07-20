@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import NumericKeypad from "@/components/NumericKeypad";
 import Tables from "@/components/Tables";
 import { Button } from "@/components/ui/button";
-import { Image } from "lucide-react";
+import { Image, Search } from "lucide-react";
 import DataTable from "@/components/DataTable";
 import { usePosStore } from "@/store";
 import Swal from "sweetalert2";
 import PaymentPopup from "@/components/PaymentPopup";
+import PhoneInputPopup from "@/components/PhoneInpuPopup";
 
 export default function TopUpPage() {
   const [loading, setLoading] = useState(true);
@@ -24,7 +25,9 @@ export default function TopUpPage() {
   const [topupMenu, setTopupMenu] = useState({});
   const [payments, setPayments] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [isSelectBank , setIsSelectBank] = useState(false);
+  const [isSelectBank, setIsSelectBank] = useState(false);
+  const [isInputPhone , setIsInputPhone] = useState(false)
+  const [enablemMember, setEnableMember] = useState(false);
   const {
     // 🔧 Actions
     addItem,
@@ -32,13 +35,12 @@ export default function TopUpPage() {
     clearCardData,
     clearMember,
     removeItemByMenuId,
-  
+
     // 🧱 States
     selectedItems,
     cardDataStore,
     member,
   } = usePosStore();
-  
 
   useEffect(() => {
     const fetchGroupMenu = async () => {
@@ -130,16 +132,18 @@ export default function TopUpPage() {
 
   const handleConfirm = (val) => {
     const price = Number(val);
-    const existingItem = selectedItems.find(item => item.menu_id === topupMenu.id);
+    const existingItem = selectedItems.find(
+      (item) => item.menu_id === topupMenu.id
+    );
     if (existingItem) {
       // มีอยู่แล้ว → รวมยอด
       const updatedItem = {
         ...existingItem,
         price: existingItem.price + price,
-        e_coin : existingItem.price + price,
+        e_coin: existingItem.price + price,
         qty: existingItem.qty + 1,
       };
-  
+
       // เอาออกก่อนแล้วค่อยเพิ่มใหม่
       removeItemByMenuId(existingItem.menu_id);
       addItem(updatedItem);
@@ -152,26 +156,26 @@ export default function TopUpPage() {
         group_menu_name: "เติมเงิน",
         menu_id: topupMenu.id,
         menu_name: topupMenu.description,
-        e_coin : price,
+        e_coin: price,
       };
       addItem(topupNew);
     }
   };
 
   const handleConfirmCash = () => {
-    setIsOpen(false)
+    setIsOpen(false);
     const cashMethod = payments.find((p) => p.name === "Cash");
     if (cashMethod) {
       topUpTocard(cashMethod);
     }
-  }
+  };
 
   const handleSelectedItem = (newItem) => {
     addItem(newItem);
   };
 
   const handlePaymentClick = (method) => {
-    let card = ''
+    let card = "";
     /* if (!member.phone) {
       Swal.fire({
         icon: "warning",
@@ -181,7 +185,7 @@ export default function TopUpPage() {
       return;
     } */
 
-    if(cardDataStore.e_coin > 0){
+    if (cardDataStore.e_coin > 0) {
       // ดัก case ที่ มี ecoin ต้องใช้บัตร
       if (!cardDataStore?.card_no || !cardDataStore?.card_type) {
         Swal.fire({
@@ -190,16 +194,12 @@ export default function TopUpPage() {
           text: "กรุณาระบุข้อมูลบัตรให้ครบถ้วน",
         });
         return;
-      }else{
-        card = cardDataStore?.card_no
+      } else {
+        card = cardDataStore?.card_no;
       }
-
-    }else{
-      card = "Card ID"
+    } else {
+      card = "Card ID";
     }
-    console.log('xxxx')
-    console.log(card);
-   
 
     if (!selectedItems.length) {
       Swal.fire({
@@ -210,22 +210,19 @@ export default function TopUpPage() {
       return;
     }
 
-    
-    if (method.name === 'Cash') {
-      setIsOpen(true)
-    } else if(method.name === 'Transfer'){
-      console.log('case tranfer');  
+    if (method.name === "Cash") {
+      setIsOpen(true);
+    } else if (method.name === "Transfer") {
+      console.log("case tranfer");
     } else {
-      topUpTocard(method , card);
+      topUpTocard(method, card);
       // default action
     }
   };
-  
- 
 
-  const topUpTocard = async (method , card) => {
+  const topUpTocard = async (method, card) => {
     const payload = {
-      bank_detail: '', // case โอนเงิน ใส่ ชื่อธนาคารไป KBANK,SCB,BAY
+      bank_detail: "", // case โอนเงิน ใส่ ชื่อธนาคารไป KBANK,SCB,BAY
       bill_location: "CCB", //Location get from user login
       bill_payment_id: method.id,
       cachier: "admin", //name from user login
@@ -234,7 +231,7 @@ export default function TopUpPage() {
       free_point: 0,
       from_channel: "POS",
       is_active: true,
-      member_tel: member?.phone ? member?.phone : '0958436474',
+      member_tel: member?.phone ? member?.phone : "0958436474",
       pos_id: "POS001", // from max addrss search
       pos_menu_id: 101,
       pos_type: "topup",
@@ -304,7 +301,7 @@ export default function TopUpPage() {
   ];
 
   const rows = selectedItems.map((item, index) => ({
-    name: item.menu_name ,
+    name: item.menu_name,
     qty: item.qty ?? 1,
     price: item.price ?? 0,
     ecoin: item.e_coin ?? 0,
@@ -325,19 +322,33 @@ export default function TopUpPage() {
 
   return (
     <div className="p-6 flex flex-col gap-4">
-      <h1 className="text-xl font-bold">เติมเงินทั่วไป</h1>
       <div className="flex items-start justify-center gap-x-6">
         <div className="w-1/4">
+          <h1 className="text-xl font-bold">เติมเงินทั่วไป</h1>
           <NumericKeypad onConfirm={handleConfirm} />
         </div>
         <div className="w-3/4">
+          <div className="relative w-1/3 mb-4 ml-auto">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 ">
+              <Search className="w-5 h-5" />
+            </span>
+            <input
+              type="text"
+              placeholder="ค้นหาเมนู"
+              className="w-full pl-10 pr-3 py-2 border border-gray-400 rounded-md text-gray-500 placeholder-gray-400 
+           focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
           <div className="flex gap-4 overflow-y-scroll">
             {groupMenus.map((menu) => (
               <Button
                 key={menu.id}
                 variant="secondary"
                 size="lg"
-                onClick={() => setSelectedId(menu.id)}
+                onClick={() => {
+                  setSelectedId(menu.id);
+                  setEnableMember(menu.enable_member);
+                }}
                 className={`py-6 px-10 text-lg rounded-xl font-semibold
               ${
                 selectedId === menu.id
@@ -346,7 +357,7 @@ export default function TopUpPage() {
               }
             `}
               >
-                {menu.display_name}
+                {menu.display_name} {menu.enable_member}
               </Button>
             ))}
           </div>
@@ -372,10 +383,12 @@ export default function TopUpPage() {
       </div>
       <div className="mt-3 flex">
         <div className="w-1/4 flex gap-4">
-          <Button className="bg-white border-[#F96C20] text-[#F96C20] border h-16 rounded-md px-10 text-2xl" onClick={() => clearItems()}>
+          <Button
+            className="bg-white border-[#F96C20] text-[#F96C20] border h-16 rounded-md px-10 text-2xl"
+            onClick={() => clearItems()}
+          >
             Clear
           </Button>
-         
         </div>
         <div className="w-3/4 flex gap-10">
           {payments.map((method) => (
@@ -402,6 +415,7 @@ export default function TopUpPage() {
         onClose={() => setIsOpen(false)}
         onConfirm={handleConfirmCash}
       />
+      
     </div>
   );
 }

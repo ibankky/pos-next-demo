@@ -1,4 +1,6 @@
+import { getBasicAuthHeader } from "@/app/lib/basicAuth"; 
 export async function GET(req) {
+    const baseUrl = process.env.POS_API_BASE_URL;
     const { searchParams } = new URL(req.url);
     //const startDate = searchParams.get("startDate");
     //const endDate = searchParams.get("endDate");
@@ -9,12 +11,12 @@ export async function GET(req) {
 
     
     try {
-    const apiUrl = `http://139.59.223.142/api/pos-transaction/list?startDate=${startDate}&endDate=${endDate}&memberTel=${memberTel}&billNo=${billNo}`;  
+    const apiUrl = `${baseUrl}/pos-transaction/list?startDate=${startDate}&endDate=${endDate}&memberTel=${memberTel}&billNo=${billNo}`;  
       const res = await fetch(apiUrl, {
         method: "GET",
         headers: {
           Accept: "application/json",
-          Authorization: "Basic YWRtaW46NDMyMQ==", // admin:1234
+          Authorization: getBasicAuthHeader(),
         },
       });
   

@@ -5,6 +5,7 @@ import { LogOut, X } from "lucide-react";
 import { usePosStore } from "@/store";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import PhoneInputPopup from "@/components/PhoneInpuPopup"
 import Swal from "sweetalert2";
 
 export default function MemberSidebar() {
@@ -20,8 +21,9 @@ export default function MemberSidebar() {
   const [phone, setPhone] = useState("");
   const [cardNo, setCardNo] = useState("");
   const [freePoint , setFreePoint] = useState("");
+  const [isInputPhone , setIsInputPhone] = useState(false)
   const router = useRouter();
-
+  
   const checkCardTelephone = async () => {
     try {
       const res = await fetch(`/api/card/tel/${member.phone}`);
@@ -75,6 +77,11 @@ export default function MemberSidebar() {
     clearMember();
   };
 
+  const handleCheckTelephone = () => {
+    console.log('check phone');
+    setIsInputPhone(true)
+  }
+
   return (
     <div className="flex flex-col h-[95%] w-64 p-4 bg-white justify-between mt-1">
       {/* ส่วนบน */}
@@ -104,7 +111,7 @@ export default function MemberSidebar() {
           </div>
           <Button
             className="w-full bg-[#5834ED] text-white h-10 p-6"
-           
+            onClick={handleCheckTelephone}
           >
             <div className="flex items-center justify-center  text-2xl">
               ค้นหาสมากชิก
@@ -211,6 +218,10 @@ export default function MemberSidebar() {
           </Button>
         </div>
       </div>
+      <PhoneInputPopup 
+        open={isInputPhone}
+        onClose={() => setIsInputPhone(false)}
+      />
     </div>
   );
 }

@@ -39,22 +39,13 @@ export default function VoidPage() {
   const [coin , setCoin] = useState(0)
   const [bonus , setBonus] = useState(0)
   const member = usePosStore((state) => state.member);
+  const [bill , setBill] = useState("")
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleVoid = () => {
-    const finalReason = isOther ? customReason : reason;
-    if (!finalReason.trim()) {
-      alert("กรุณาระบุเหตุผลให้ครบถ้วน");
-      return;
-    }
-
-    console.log("Void with reason:", finalReason);
-    // ทำการส่งข้อมูลไป backend ตรงนี้
-  };
 
   useEffect(() => {
     const { startDate, endDate, phone, billNo } = formData;
@@ -81,14 +72,14 @@ export default function VoidPage() {
       // สมมติว่า cardData มีโครงสร้างเป็น object เช่น { card_no: 'ABC123' }
       Object.entries(cardData).forEach(([key, value]) => {
         if (value !== undefined && value !== "") {
-          queryParams.append(key, value);
+          query.append(key, value);
         }
       });
     }
     //console.log('query');
     //console.log(query);
     try {
-      const res = await fetch(`/api/pos/transaction?${queryParams.toString()}`);
+      const res = await fetch(`/api/pos/transaction?${query.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch branches");
       const json = await res.json();
       setTransaction(json.data.data.result);
@@ -113,19 +104,47 @@ export default function VoidPage() {
 
   const handleSelectedItem = async (item) => {
     const subTransaction = await fetchPosSubTransaction(item.bill_no);
+    console.log(item.bill_no)
+    
     const newItem = {
       ...item,
       name: subTransaction.menu_name,
     };
     setSelectedItem([newItem]);
+    setBill(item.bill_no)
   };
 
-  const voidTransaction = () => {
-    const payload = {
-      bill_no: billNo,
-      card_no: cardNo,
-      void_reason: voidReason,
-      void_user: voidUser,
+  const voidTransaction = async () => {
+    const finalReason = isOther ? customReason : reason;
+    if (!finalReason.trim()) {
+      alert("กรุณาระบุเหตุผลให้ครบถ้วน");
+      return;
+    }
+    console.log(bill)
+    console.log("Void with reason:", finalReason);
+   
+    try {
+      const payload = {
+        bill_no: bill,
+        card_no: '8585gfd',
+        void_reason: finalReason,
+        void_user: "admin",
+      };
+      const res = await fetch("/api/pos/pos-void", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch branches");
+      const json = await res.json();
+      console.log(json)
+      //return json.data.data[0];
+      //setMenuData(json.data.result);
+    } catch (err) {
+      console.error("Error loading menuDataList:", err);
     }
   }
 
@@ -374,10 +393,9 @@ export default function VoidPage() {
               : "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
           }`}
             />
-
             <div className="mt-4 flex gap-3">
               <button
-                onClick={handleVoid}
+                onClick={voidTransaction}
                 className="flex-1 bg-[#5834ED] text-white font-bold py-2 rounded"
               >
                 Void
