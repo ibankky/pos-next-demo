@@ -7,7 +7,7 @@ export default function TablesClaim({ rows = [] , }) {
 
 
   
-  if (!rows.length) return <div className="text-center py-4 text-gray-500">No data</div>;
+  if (!rows.length) return <div className="text-center py-4 text-gray-500 bg-white min-h-60 flex items-center justify-center">No data</div>;
 
   const headers = Object.keys(rows[0]).filter((key) => key !== "menu_id");
   
@@ -22,9 +22,9 @@ export default function TablesClaim({ rows = [] , }) {
   
 
   return (
-    <div className="overflow-auto border rounded-lg shadow">
+    <div className="h-60 overflow-y-auto border rounded-lg shadow ">
       <table className="min-w-full table-auto text-md text-left text-gray-700">
-        <thead className="bg-gray-200 text-gray-800 text-md font-semibold">
+        <thead className="bg-gray-200 text-gray-800 text-md font-semibold sticky top-0 z-10">
           <tr>
             {headers.map((key) => (
               <th key={key} className={`px-4 py-2 ${typeof rows[0][key] === 'number' ? 'text-right' : ''}`}>

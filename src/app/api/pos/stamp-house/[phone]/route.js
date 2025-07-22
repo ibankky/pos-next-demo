@@ -1,6 +1,7 @@
-export async function GET() {
-  
-    const res = await fetch(`http://139.59.223.142/api/stamp-house/list?memberTel=0985850400`, {
+export async function GET(req, { params }) {
+  const { phone } = await params;
+  console.log(phone)
+    const res = await fetch(`http://139.59.223.142/api/stamp-house/list?memberTel=${phone}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
