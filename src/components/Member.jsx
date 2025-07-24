@@ -24,9 +24,9 @@ export default function MemberSidebar() {
   const [isInputPhone , setIsInputPhone] = useState(false)
   const router = useRouter();
   
-  const checkCardTelephone = async () => {
+  const checkCardTelephone = async (phone) => {
     try {
-      const res = await fetch(`/api/card/tel/${member.phone}`);
+      const res = await fetch(`/api/card/tel/${phone}`);
       if (res.status !== 200) {
         Swal.fire({
           icon: "warning",
@@ -221,6 +221,11 @@ export default function MemberSidebar() {
       <PhoneInputPopup 
         open={isInputPhone}
         onClose={() => setIsInputPhone(false)}
+        onSubmit={(phone) => {  
+         
+          console.log("ได้เบอร์:", phone);
+          checkCardTelephone(phone);
+        }}
       />
     </div>
   );
